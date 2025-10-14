@@ -136,7 +136,7 @@ public class Shooter extends SDKSubsystem {
         targetSupplier.reset();
     }
 
-    public void launchBall() {
+    public void setLauncher() {
         launcher.get().setPosition(LAUNCH_POS);
     }
 
@@ -179,5 +179,14 @@ public class Shooter extends SDKSubsystem {
                 .setInit(() -> setShooterTargetVelocity(target));
     }
 
+    public Lambda launchBall() {
+        return new Lambda("launchBall")
+                .setInit(() -> setLauncher());
+    }
+
+    public Lambda resetBallLauncher() {
+        return new Lambda("launchBall")
+                .setInit(() -> resetLauncher());
+    }
 
 }

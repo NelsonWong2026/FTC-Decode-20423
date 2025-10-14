@@ -3,9 +3,6 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import static org.firstinspires.ftc.teamcode.Constants.Intake.INTAKE_D;
 import static org.firstinspires.ftc.teamcode.Constants.Intake.INTAKE_I;
 import static org.firstinspires.ftc.teamcode.Constants.Intake.INTAKE_P;
-import static org.firstinspires.ftc.teamcode.Constants.Shooter.SHOOTER_D;
-import static org.firstinspires.ftc.teamcode.Constants.Shooter.SHOOTER_I;
-import static org.firstinspires.ftc.teamcode.Constants.Shooter.SHOOTER_P;
 
 import androidx.annotation.NonNull;
 

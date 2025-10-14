@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import androidx.annotation.NonNull;
-
+/*
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 
@@ -10,7 +10,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-
+*/
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -44,7 +44,7 @@ public class Vision extends SDKSubsystem {
     public void setDependency(@NonNull Dependency<?> dependency) {
         this.dependency = dependency;
     }
-
+/*
     private final Cell<Limelight3A> limelight = subsystemCell(() -> getHardwareMap().get(Limelight3A.class, "limelight"));
 
     public void startLimelight() {
@@ -61,6 +61,6 @@ public class Vision extends SDKSubsystem {
         YawPitchRollAngles orientation = result.getBotpose_MT2().getOrientation();
         return new Pose2D(position.unit, position.x, position.y, AngleUnit.RADIANS, orientation.getYaw());
     }
-
+*/
 
 }
