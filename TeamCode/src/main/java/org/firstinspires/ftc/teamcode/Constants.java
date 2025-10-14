@@ -20,9 +20,17 @@ public class Constants {
         public static final double GRAVITY = 9.80665;
         public static final double SHOOTER_ANGLE = 40;
 
-        public static final double SHOOTER_P = 0.0;
-        public static final double SHOOTER_I = 0.0;
-        public static final double SHOOTER_D = 0.0;
+        //servo positions
+        public static final double LAUNCH_POS = 0;
+        public static final double FLAT_POS = 0;
+
+        public static final double TOP_SHOOTER_P = 0.0;
+        public static final double TOP_SHOOTER_I = 0.0;
+        public static final double TOP_SHOOTER_D = 0.0;
+
+        public static final double BOTTOM_SHOOTER_P = 0.0;
+        public static final double BOTTOM_SHOOTER_I = 0.0;
+        public static final double BOTTOM_SHOOTER_D = 0.0;
 
         public static final double PIVOT_P = 0.0;
         public static final double PIVOT_I = 0.0;
@@ -32,5 +40,9 @@ public class Constants {
     public static final class Intake {
         public static final String intake = "intake";
         public static final double intakeSpeed = 0.8;
+
+        public static final double INTAKE_P = 0.0;
+        public static final double INTAKE_I = 0.0;
+        public static final double INTAKE_D = 0.0;
     }
 }
