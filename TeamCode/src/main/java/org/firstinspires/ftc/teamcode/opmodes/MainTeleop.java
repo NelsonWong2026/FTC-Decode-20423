@@ -15,6 +15,11 @@ import org.slf4j.LoggerFactory;
 
 import dev.frozenmilk.mercurial.Mercurial;
 
+@Mercurial.Attach
+@Drive.Attach
+@Intake.Attach
+@Shooter.Attach
+@Vision.Attach
 @TeleOp(name = "Main Teleop")
 public class MainTeleop extends OpMode {
 

@@ -90,6 +90,7 @@ public class Shooter extends SDKSubsystem {
         }
         return Double.NaN;
     });
+
     private final Cell<DoubleController> bottomController = subsystemCell(() ->
             new DoubleController(
                     targetSupplier,
@@ -144,12 +145,20 @@ public class Shooter extends SDKSubsystem {
         launcher.get().setPosition(FLAT_POS);
     }
 
+    public void launcherPosition(double pos) {
+        launcher.get().setPosition(pos);
+    }
+
     public void intake() {
+        topController.get().setEnabled(false);
+        bottomController.get().setEnabled(false);
         topFlyWheel.get().setPower(0.6);
         bottomFlyWheel.get().setPower(0.6);
     }
 
     public void outtake() {
+        topController.get().setEnabled(false);
+        bottomController.get().setEnabled(false);
         topFlyWheel.get().setPower(-0.6);
         bottomFlyWheel.get().setPower(-0.6);
     }
@@ -187,6 +196,11 @@ public class Shooter extends SDKSubsystem {
     public Lambda resetBallLauncher() {
         return new Lambda("launchBall")
                 .setInit(() -> resetLauncher());
+    }
+
+    public Lambda setLauncherPosition(double pos) {
+        return new Lambda("setLauncherPosition")
+                .setInit(() -> launcherPosition(pos));
     }
 
 }

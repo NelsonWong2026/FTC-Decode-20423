@@ -86,6 +86,7 @@ public class Intake extends SDKSubsystem {
         }
         return Double.NaN;
     });
+
     private final Cell<DoubleController> controller = subsystemCell(() ->
             new DoubleController(
                     targetSupplier,
@@ -101,10 +102,12 @@ public class Intake extends SDKSubsystem {
     );
 
     public void intake() {
+        controller.get().setEnabled(false);
         intake.get().setPower(Constants.Intake.intakeSpeed);
     }
 
     public void outtake() {
+        controller.get().setEnabled(false);
         intake.get().setPower(-Constants.Intake.intakeSpeed);
     }
 
