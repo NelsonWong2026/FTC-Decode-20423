@@ -14,15 +14,20 @@ public class Constants {
         public static final String leftPivot = "leftPivot";
         public static final String rightPivot = "rightPivot";
         public static final String launcher = "launcher";
+        public static final String blocker = "blocker";
         public static final double SHOOTER_HEIGHT = 0;
         public static final double TARGET_HEIGHT = 0;
         public static final double FLYWHEEL_RADIUS = 0;
         public static final double GRAVITY = 9.80665;
         public static final double SHOOTER_ANGLE = 40;
 
-        //servo positions
-        public static final double LAUNCH_POS = 0;
-        public static final double FLAT_POS = 0;
+        //launcher servo positions
+        public static final double LAUNCH_POS = 0.7;
+        public static final double FLAT_POS = 1;
+
+        //blocker servo positions
+        public static final double BLOCK_POS = 0;
+        public static final double CLEAR_POS = 0.27;
 
         public static final double TOP_SHOOTER_P = 0.0;
         public static final double TOP_SHOOTER_I = 0.0;

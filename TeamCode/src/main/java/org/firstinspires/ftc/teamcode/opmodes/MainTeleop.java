@@ -14,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dev.frozenmilk.mercurial.Mercurial;
+import dev.frozenmilk.mercurial.commands.groups.Parallel;
+import dev.frozenmilk.mercurial.commands.groups.Sequential;
 
 @Mercurial.Attach
 @Drive.Attach
@@ -27,7 +29,7 @@ public class MainTeleop extends OpMode {
 
     @Override
     public void init() {
-        Drive.INSTANCE.setDefaultCommand(Drive.INSTANCE.driveCommand(true));
+        Drive.INSTANCE.setDefaultCommand(Drive.INSTANCE.tankDriveCommand());
         Mercurial.gamepad2().dpadUp()
                 .onTrue(Intake.INSTANCE.setIntake())
                 .onFalse(Intake.INSTANCE.stopIntake());
@@ -40,9 +42,30 @@ public class MainTeleop extends OpMode {
         Mercurial.gamepad2().y()
                 .onTrue(Shooter.INSTANCE.setOuttake())
                 .onFalse(Shooter.INSTANCE.stopShooter());
+        /*Mercurial.gamepad2().y()
+                .onTrue(new Parallel(
+                        Shooter.INSTANCE.setOuttake(),
+                        Intake.INSTANCE.setIntake()
+                ))
+                .onFalse(new Parallel(
+                        Shooter.INSTANCE.stopShooter(),
+                        Intake.INSTANCE.stopIntake()
+                ));*/
+
+        Mercurial.gamepad2().leftBumper()
+                .onTrue(Shooter.INSTANCE.blockBall())
+                .onFalse(Shooter.INSTANCE.unblockBall());
         Mercurial.gamepad2().rightBumper()
-                .onTrue(Shooter.INSTANCE.launchBall())
-                .onFalse(Shooter.INSTANCE.resetBallLauncher());
+                .onTrue(new Parallel(
+                        Shooter.INSTANCE.launchBall()
+                        //Shooter.INSTANCE.unblockBall()
+                ))
+                .onFalse(new Parallel(
+                        Shooter.INSTANCE.resetBallLauncher()
+                        //Shooter.INSTANCE.blockBall()
+                ));
+
+
         //Vision.INSTANCE.startLimelight();
     }
 

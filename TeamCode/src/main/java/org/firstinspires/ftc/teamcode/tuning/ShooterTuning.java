@@ -6,6 +6,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 
@@ -16,7 +17,8 @@ import dev.frozenmilk.mercurial.Mercurial;
 @Config
 @TeleOp(name="ShooterTuning", group = "Tuning")
 public class ShooterTuning extends OpMode {
-    public static double pos = 0;
+    public static double launcherPos = Constants.Shooter.FLAT_POS;
+    public static double blockerPos = Constants.Shooter.CLEAR_POS;
 
     @Override
     public void init() {
@@ -25,7 +27,8 @@ public class ShooterTuning extends OpMode {
 
     @Override
     public void loop() {
-        Shooter.INSTANCE.launcherPosition(pos);
+        Shooter.INSTANCE.launcherPosition(launcherPos);
+        Shooter.INSTANCE.blockerPosition(blockerPos);
         telemetry.update();
     }
 }

@@ -58,6 +58,7 @@ public class Shooter extends SDKSubsystem {
     private final Cell<DcMotorEx> topFlyWheel = subsystemCell(() -> getHardwareMap().get(DcMotorEx.class, Constants.Shooter.topFlyWheel));
     private final Cell<DcMotorEx> bottomFlyWheel = subsystemCell(() -> getHardwareMap().get(DcMotorEx.class, Constants.Shooter.bottomFlyWheel));
     private final Cell<Servo> launcher = subsystemCell(() -> getHardwareMap().get(Servo.class, Constants.Shooter.launcher));
+    private final Cell<Servo> blocker = subsystemCell(() -> getHardwareMap().get(Servo.class, Constants.Shooter.blocker));
 //    private final Cell<DcMotorEx> leftPivot = subsystemCell(() -> getHardwareMap().get(DcMotorEx.class, Constants.Shooter.leftPivot));
 //    private final Cell<DcMotorEx> rightPivot = subsystemCell(() -> getHardwareMap().get(DcMotorEx.class, Constants.Shooter.rightPivot));
 
@@ -145,22 +146,34 @@ public class Shooter extends SDKSubsystem {
         launcher.get().setPosition(FLAT_POS);
     }
 
+    public void setBlocker() {
+        blocker.get().setPosition(BLOCK_POS);
+    }
+
+    public void clearBlocker() {
+        blocker.get().setPosition(CLEAR_POS);
+    }
+
     public void launcherPosition(double pos) {
         launcher.get().setPosition(pos);
+    }
+
+    public void blockerPosition(double pos) {
+        blocker.get().setPosition(pos);
     }
 
     public void intake() {
         topController.get().setEnabled(false);
         bottomController.get().setEnabled(false);
-        topFlyWheel.get().setPower(0.6);
-        bottomFlyWheel.get().setPower(0.6);
+        topFlyWheel.get().setPower(-1);
+        bottomFlyWheel.get().setPower(-1);
     }
 
     public void outtake() {
         topController.get().setEnabled(false);
         bottomController.get().setEnabled(false);
-        topFlyWheel.get().setPower(-0.6);
-        bottomFlyWheel.get().setPower(-0.6);
+        topFlyWheel.get().setPower(1);
+        bottomFlyWheel.get().setPower(1);
     }
 
     public void stop() {
@@ -185,7 +198,8 @@ public class Shooter extends SDKSubsystem {
 
     public Lambda setShooterTargetVelocity(double target) {
         return new Lambda("setShooterTargetVelocity")
-                .setInit(() -> setShooterTargetVelocity(target));
+                .setInit(() -> setShooterTargetVelocity(target))
+                .setFinish(() -> topController.get().finished() && bottomController.get().finished());
     }
 
     public Lambda launchBall() {
@@ -196,6 +210,16 @@ public class Shooter extends SDKSubsystem {
     public Lambda resetBallLauncher() {
         return new Lambda("launchBall")
                 .setInit(() -> resetLauncher());
+    }
+
+    public Lambda blockBall() {
+        return new Lambda("blockBall")
+                .setInit(() -> setBlocker());
+    }
+
+    public Lambda unblockBall() {
+        return new Lambda("launchBall")
+                .setInit(() -> clearBlocker());
     }
 
     public Lambda setLauncherPosition(double pos) {

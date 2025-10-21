@@ -152,10 +152,18 @@ public class Drive extends SDKSubsystem {
         return new Lambda("tankDriveCommand")
                 .setRequirements(this)
                 .setExecute(() -> {
-                    leftFront.get().setPower(-gamepad1.leftStickY().state());
-                    leftBack.get().setPower(-gamepad1.leftStickY().state());
-                    rightFront.get().setPower(-gamepad1.rightStickY().state());
-                    rightBack.get().setPower(-gamepad1.rightStickY().state());
+                    if (gamepad1.rightBumper().state()) {
+                        leftFront.get().setPower(gamepad1.leftStickY().state() / 4);
+                        leftBack.get().setPower(gamepad1.leftStickY().state() / 4);
+                        rightFront.get().setPower(gamepad1.rightStickY().state() / 4);
+                        rightBack.get().setPower(gamepad1.rightStickY().state() / 4);
+                    }
+                    else {
+                        leftFront.get().setPower(gamepad1.leftStickY().state());
+                        leftBack.get().setPower(gamepad1.leftStickY().state());
+                        rightFront.get().setPower(gamepad1.rightStickY().state());
+                        rightBack.get().setPower(gamepad1.rightStickY().state());
+                    }
                 });
     }
 }
