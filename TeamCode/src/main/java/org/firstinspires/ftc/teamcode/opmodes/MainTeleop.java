@@ -29,7 +29,7 @@ public class MainTeleop extends OpMode {
 
     @Override
     public void init() {
-        Drive.INSTANCE.setDefaultCommand(Drive.INSTANCE.tankDriveCommand());
+        Drive.INSTANCE.setDefaultCommand(Drive.INSTANCE.driveCommand(true));
         Mercurial.gamepad2().dpadUp()
                 .onTrue(Intake.INSTANCE.setIntake())
                 .onFalse(Intake.INSTANCE.stopIntake());
@@ -79,7 +79,11 @@ public class MainTeleop extends OpMode {
 //        Pose2D botpose = Vision.INSTANCE.getBotPose();
 //        telemetry.addData("Bot Pose", "X: %d, Y: %d, Heading: %d",
 //                botpose.getX(DistanceUnit.METER), botpose.getY(DistanceUnit.METER), botpose.getHeading(AngleUnit.DEGREES));
-//        telemetry.update();
+        telemetry.addData("Top Flywheel Distance", "%.3f rot", Shooter.INSTANCE.getTopFlywheelDistance());
+        telemetry.addData("Bottom Flywheel Distance","%.3f rot", Shooter.INSTANCE.getBottomFlywheelDistance());
+        telemetry.addData("Top Flywheel Velocity","%.3f RPM", Shooter.INSTANCE.getTopFlywheelVelocity());
+        telemetry.addData("Bottom Flywheel Velocity","%.3f RPM", Shooter.INSTANCE.getBottomFlywheelVelocity());
+        telemetry.update();
     }
 
     @Override

@@ -1,15 +1,28 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import static org.firstinspires.ftc.teamcode.Constants.Shooter.*;
+import static org.firstinspires.ftc.teamcode.config.ShooterPIDF.BOTTOM_SHOOTER_D;
+import static org.firstinspires.ftc.teamcode.config.ShooterPIDF.BOTTOM_SHOOTER_FF;
+import static org.firstinspires.ftc.teamcode.config.ShooterPIDF.BOTTOM_SHOOTER_I;
+import static org.firstinspires.ftc.teamcode.config.ShooterPIDF.BOTTOM_SHOOTER_P;
+import static org.firstinspires.ftc.teamcode.config.ShooterPIDF.TOP_SHOOTER_D;
+import static org.firstinspires.ftc.teamcode.config.ShooterPIDF.TOP_SHOOTER_FF;
+import static org.firstinspires.ftc.teamcode.config.ShooterPIDF.TOP_SHOOTER_I;
+import static org.firstinspires.ftc.teamcode.config.ShooterPIDF.TOP_SHOOTER_P;
 
 import androidx.annotation.NonNull;
 
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.SleepAction;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.hardware.ServoControllerEx;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.util.DoubleComponent;
@@ -26,6 +39,7 @@ import dev.frozenmilk.dairy.core.util.controller.implementation.DoubleController
 import dev.frozenmilk.dairy.core.util.supplier.numeric.CachedMotionComponentSupplier;
 import dev.frozenmilk.dairy.core.util.supplier.numeric.EnhancedDoubleSupplier;
 import dev.frozenmilk.dairy.core.util.supplier.numeric.MotionComponents;
+import dev.frozenmilk.dairy.core.wrapper.Wrapper;
 import dev.frozenmilk.mercurial.commands.Lambda;
 import dev.frozenmilk.mercurial.subsystems.SDKSubsystem;
 import dev.frozenmilk.mercurial.subsystems.Subsystem;
@@ -61,6 +75,12 @@ public class Shooter extends SDKSubsystem {
     private final Cell<Servo> blocker = subsystemCell(() -> getHardwareMap().get(Servo.class, Constants.Shooter.blocker));
 //    private final Cell<DcMotorEx> leftPivot = subsystemCell(() -> getHardwareMap().get(DcMotorEx.class, Constants.Shooter.leftPivot));
 //    private final Cell<DcMotorEx> rightPivot = subsystemCell(() -> getHardwareMap().get(DcMotorEx.class, Constants.Shooter.rightPivot));
+
+    @Override
+    public void preUserInitHook(Wrapper opMode) {
+        topFlyWheel.get().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        bottomFlyWheel.get().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+    }
 
     //encoder
     private final Cell<EnhancedDoubleSupplier> bottomEncoder = subsystemCell(() -> new EnhancedDoubleSupplier(() -> (double) bottomFlyWheel.get().getCurrentPosition()));
@@ -100,9 +120,10 @@ public class Shooter extends SDKSubsystem {
                     (Double power) -> {
                         bottomFlyWheel.get().setPower(power);
                     },
-                    new DoubleComponent.P(MotionComponents.STATE, () -> BOTTOM_SHOOTER_P)
-                            .plus(new DoubleComponent.I(MotionComponents.STATE, () -> BOTTOM_SHOOTER_I))
-                            .plus(new DoubleComponent.D(MotionComponents.STATE, () -> BOTTOM_SHOOTER_D))
+                    new DoubleComponent.P(MotionComponents.VELOCITY, () -> BOTTOM_SHOOTER_P)
+                            .plus(new DoubleComponent.I(MotionComponents.VELOCITY, () -> BOTTOM_SHOOTER_I))
+                            .plus(new DoubleComponent.D(MotionComponents.VELOCITY, () -> BOTTOM_SHOOTER_D))
+                            .plus(new DoubleComponent.FF(MotionComponents.VELOCITY, () -> BOTTOM_SHOOTER_FF))
             )
     );
 
@@ -114,9 +135,10 @@ public class Shooter extends SDKSubsystem {
                     (Double power) -> {
                         topFlyWheel.get().setPower(power);
                     },
-                    new DoubleComponent.P(MotionComponents.STATE, () -> TOP_SHOOTER_P)
-                            .plus(new DoubleComponent.I(MotionComponents.STATE, () -> TOP_SHOOTER_I))
-                            .plus(new DoubleComponent.D(MotionComponents.STATE, () -> TOP_SHOOTER_D))
+                    new DoubleComponent.P(MotionComponents.VELOCITY, () -> TOP_SHOOTER_P)
+                            .plus(new DoubleComponent.I(MotionComponents.VELOCITY, () -> TOP_SHOOTER_I))
+                            .plus(new DoubleComponent.D(MotionComponents.VELOCITY, () -> TOP_SHOOTER_D))
+                            .plus(new DoubleComponent.FF(MotionComponents.VELOCITY, () -> TOP_SHOOTER_FF))
             )
     );
 
@@ -134,8 +156,24 @@ public class Shooter extends SDKSubsystem {
     public void setTargetVelocity(double target) {
         topController.get().setEnabled(true);
         bottomController.get().setEnabled(true);
-        this.targetVel = target;
+        this.targetVel = target * shooterTicksPerRevolution / 60; //converting rpm to tick/s
         targetSupplier.reset();
+    }
+
+    public double getTopFlywheelVelocity() {
+        return topEncoder.get().velocity() / shooterTicksPerRevolution * 60;
+    }
+
+    public double getBottomFlywheelVelocity() {
+        return bottomEncoder.get().velocity() / shooterTicksPerRevolution * 60;
+    }
+
+    public double getTopFlywheelDistance() {
+        return topEncoder.get().state() / shooterTicksPerRevolution;
+    }
+
+    public double getBottomFlywheelDistance() {
+        return bottomEncoder.get().state() / shooterTicksPerRevolution;
     }
 
     public void setLauncher() {
@@ -198,7 +236,7 @@ public class Shooter extends SDKSubsystem {
 
     public Lambda setShooterTargetVelocity(double target) {
         return new Lambda("setShooterTargetVelocity")
-                .setInit(() -> setShooterTargetVelocity(target))
+                .setInit(() -> setTargetVelocity(target))
                 .setFinish(() -> topController.get().finished() && bottomController.get().finished());
     }
 
@@ -210,6 +248,17 @@ public class Shooter extends SDKSubsystem {
     public Lambda resetBallLauncher() {
         return new Lambda("launchBall")
                 .setInit(() -> resetLauncher());
+    }
+
+    public Lambda launchAndResetBallLauncher() {
+        return new Lambda("launchAndResetBallLauncher")
+                .setInit(() -> {
+                    ElapsedTime timer = new ElapsedTime();
+                    setLauncher();
+                    if (timer.seconds() > 1) {
+                        resetLauncher();
+                    }
+                });
     }
 
     public Lambda blockBall() {

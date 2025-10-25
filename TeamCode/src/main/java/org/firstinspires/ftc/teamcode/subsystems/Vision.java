@@ -13,9 +13,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 */
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
@@ -54,6 +57,12 @@ public class Vision extends SDKSubsystem {
     }
 /*
     private final Cell<Limelight3A> limelight = subsystemCell(() -> getHardwareMap().get(Limelight3A.class, "limelight"));
+    // Retrieve the IMU from the hardware map
+    final Cell<IMU> imu = subsystemCell(() -> getHardwareMap().get(IMU.class, "imu"));
+    // Adjust the orientation parameters to match your robot
+    IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
+            RevHubOrientationOnRobot.LogoFacingDirection.UP,
+            RevHubOrientationOnRobot.UsbFacingDirection.LEFT));
 
     public void startLimelight() {
         limelight.get().start();
@@ -63,12 +72,17 @@ public class Vision extends SDKSubsystem {
         limelight.get().stop();
     }
 
-    public Pose2D getBotPose() {
+    public Pose3D getBotPose() {
         LLResult result = limelight.get().getLatestResult();
-        Position position = result.getBotpose_MT2().getPosition();
-        YawPitchRollAngles orientation = result.getBotpose_MT2().getOrientation();
-        return new Pose2D(position.unit, position.x, position.y, AngleUnit.RADIANS, orientation.getYaw());
-    }
-*/
+        YawPitchRollAngles orientation = imu.get().getRobotYawPitchRollAngles();
+        limelight.get().updateRobotOrientation(orientation.getYaw());
+        if (result != null && result.isValid()) {
+            return result.getBotpose_MT2();
+        }
+        else {
+            return null;
+        }
+    }*/
+
 
 }

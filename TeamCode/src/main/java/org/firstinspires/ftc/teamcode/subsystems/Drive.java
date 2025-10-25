@@ -6,6 +6,7 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Constants;
@@ -72,6 +73,26 @@ public class Drive extends SDKSubsystem {
         rightFront.get().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBack.get().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         imu.get().initialize(parameters);
+    }
+
+    public Lambda driveForward() {
+        return new Lambda("DriveForward")
+                .setInit(() -> {
+                    leftFront.get().setPower(1);
+                    leftBack.get().setPower(1);
+                    rightFront.get().setPower(1);
+                    rightBack.get().setPower(1);
+                });
+    }
+
+    public Lambda stopDrive() {
+        return new Lambda("StopDrive")
+                .setInit(() -> {
+                    leftFront.get().setPower(0);
+                    leftBack.get().setPower(0);
+                    rightFront.get().setPower(0);
+                    rightBack.get().setPower(0);
+                });
     }
 
     public Lambda driveCommand(boolean isFieldCentric) {

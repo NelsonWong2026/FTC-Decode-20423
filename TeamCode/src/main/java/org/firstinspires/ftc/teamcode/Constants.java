@@ -17,9 +17,10 @@ public class Constants {
         public static final String blocker = "blocker";
         public static final double SHOOTER_HEIGHT = 0;
         public static final double TARGET_HEIGHT = 0;
-        public static final double FLYWHEEL_RADIUS = 0;
+        public static final double FLYWHEEL_RADIUS = 2; //inches
         public static final double GRAVITY = 9.80665;
         public static final double SHOOTER_ANGLE = 40;
+        public static final double shooterTicksPerRevolution = 28;
 
         //launcher servo positions
         public static final double LAUNCH_POS = 0.7;
@@ -28,14 +29,6 @@ public class Constants {
         //blocker servo positions
         public static final double BLOCK_POS = 0;
         public static final double CLEAR_POS = 0.27;
-
-        public static final double TOP_SHOOTER_P = 0.0;
-        public static final double TOP_SHOOTER_I = 0.0;
-        public static final double TOP_SHOOTER_D = 0.0;
-
-        public static final double BOTTOM_SHOOTER_P = 0.0;
-        public static final double BOTTOM_SHOOTER_I = 0.0;
-        public static final double BOTTOM_SHOOTER_D = 0.0;
 
         public static final double PIVOT_P = 0.0;
         public static final double PIVOT_I = 0.0;

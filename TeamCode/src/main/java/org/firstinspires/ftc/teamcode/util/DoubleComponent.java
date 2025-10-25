@@ -135,4 +135,43 @@ public abstract class DoubleComponent {
             previousError = 0.0;
         }
     }
+
+    public static class FF implements ControllerCalculation<Double> {
+        private final MotionComponents motionComponent;
+        private DoubleSupplier kFF;
+
+        public FF(MotionComponents motionComponent, DoubleSupplier kFFSupplier) {
+            this.motionComponent = motionComponent;
+            this.kFF = kFFSupplier;
+        }
+
+        @Override
+        public void update(
+                @NotNull Double accumulation,
+                @NotNull MotionComponentSupplier<? extends Double> state,
+                @NotNull MotionComponentSupplier<? extends Double> target,
+                @NotNull MotionComponentSupplier<? extends Double> error,
+                double deltaTime
+        ) {
+            // no implementation
+        }
+
+        @Override
+        public Double evaluate(
+                @NotNull Double accumulation,
+                @NotNull MotionComponentSupplier<? extends Double> state,
+                @NotNull MotionComponentSupplier<? extends Double> target,
+                @NotNull MotionComponentSupplier<? extends Double> error,
+                double deltaTime
+        ) {
+            Double res = target.get(motionComponent) * kFF.getAsDouble();
+            if (Double.isNaN(res)) return accumulation;
+            else return accumulation + res;
+        }
+
+        @Override
+        public void reset() {
+            // no implementation
+        }
+    }
 }
