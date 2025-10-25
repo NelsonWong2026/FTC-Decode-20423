@@ -20,8 +20,8 @@ import dev.frozenmilk.mercurial.Mercurial;
 @SilkRoad.Attach
 @Mercurial.Attach
 @Config
-@Autonomous(name = "Main Auto", group = "Autonomous")
-public class MainAuto extends OpMode {
+@Autonomous(name = "Shoot and Leave Auto", group = "Autonomous")
+public class ShootAndLeaveAuto extends OpMode {
 
     @Override
     public void init() {
