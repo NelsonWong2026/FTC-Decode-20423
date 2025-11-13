@@ -33,7 +33,7 @@ public class ShootAndLeaveAuto extends OpMode {
         SilkRoad.RunAsync(
             new SequentialAction(
                 new MercurialAction(Shooter.INSTANCE.setOuttake()),
-                new SleepAction(3),
+                new SleepAction(4),
                 //shoot ball
                 new MercurialAction(Shooter.INSTANCE.launchBall()),
                 new SleepAction(1),

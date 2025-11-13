@@ -43,4 +43,11 @@ public class Constants {
         public static final double INTAKE_I = 0.0;
         public static final double INTAKE_D = 0.0;
     }
+
+    public static final class Vision {
+        public static final String limelight = "limelight";
+        public static final double llHeight = 0;
+        public static final double llAngleAboveGround = 0;
+        public static final double aprilTagHeight = 0;
+    }
 }

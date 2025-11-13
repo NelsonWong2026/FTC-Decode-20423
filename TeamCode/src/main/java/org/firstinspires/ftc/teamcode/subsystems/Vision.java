@@ -21,6 +21,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.Constants;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -55,7 +56,7 @@ public class Vision extends SDKSubsystem {
     public void setDependency(@NonNull Dependency<?> dependency) {
         this.dependency = dependency;
     }
-/*
+
     private final Cell<Limelight3A> limelight = subsystemCell(() -> getHardwareMap().get(Limelight3A.class, "limelight"));
     // Retrieve the IMU from the hardware map
     final Cell<IMU> imu = subsystemCell(() -> getHardwareMap().get(IMU.class, "imu"));
@@ -82,7 +83,26 @@ public class Vision extends SDKSubsystem {
         else {
             return null;
         }
-    }*/
+    }
+
+    public LLResult getLLResult() {
+        LLResult result = limelight.get().getLatestResult();
+        if (result != null && result.isValid()) {
+            return result;
+        }
+        else {
+            return null;
+        }
+    }
+
+    public double DistanceFromGoal() {
+        LLResult result = limelight.get().getLatestResult();
+        double distance;
+        if (result != null && result.isValid()) {
+            return (Constants.Vision.aprilTagHeight-Constants.Vision.llHeight)/Math.tan(-result.getTy()+Constants.Vision.llAngleAboveGround);
+        }
+        return 0;
+    }
 
 
 }
