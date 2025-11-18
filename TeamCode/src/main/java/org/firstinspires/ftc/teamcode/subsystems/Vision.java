@@ -14,17 +14,29 @@ import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.util.GoBildaPinpointDriver;
 
 import dev.nextftc.core.subsystems.Subsystem;
+import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.hardware.impl.Direction;
 import dev.nextftc.hardware.impl.IMUEx;
 
 public class Vision implements Subsystem {
+    public static final Vision INSTANCE = new Vision();
+    private Vision() {};
+
     private Limelight3A limelight;
     private IMUEx imu = new IMUEx("imu", Direction.UP, Direction.LEFT);
     private GoBildaPinpointDriver odo;
 
-    public Vision(HardwareMap hwMap) {
-        limelight = hwMap.get(Limelight3A.class, Constants.Vision.limelight);
-        odo = hwMap.get(GoBildaPinpointDriver.class, Constants.Drive.pinpoint);
+    @Override
+    public void initialize() {
+        // initialization logic (runs on init)
+        odo = ActiveOpMode.hardwareMap().get(GoBildaPinpointDriver.class, Constants.Drive.pinpoint);
+        limelight = ActiveOpMode.hardwareMap().get(Limelight3A.class, Constants.Vision.limelight);
+    }
+
+    @Override
+    public void periodic() {
+        // periodic logic (runs every loop)
+        odo.update();
     }
 
     public void startLimelight() {

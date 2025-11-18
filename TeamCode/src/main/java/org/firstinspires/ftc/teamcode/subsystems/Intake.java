@@ -21,6 +21,9 @@ import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.hardware.impl.MotorEx;
 
 public class Intake implements Subsystem {
+    public static final Intake INSTANCE = new Intake();
+    private Intake() {};
+
     private MotorEx intake = new MotorEx(Constants.Intake.intake);
     private double encoder = intake.getCurrentPosition();
 

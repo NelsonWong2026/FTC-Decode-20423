@@ -17,8 +17,10 @@ import org.firstinspires.ftc.teamcode.Constants;
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.Subsystem;
+import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.ftc.GamepadEx;
 import dev.nextftc.ftc.Gamepads;
+import dev.nextftc.hardware.driving.FieldCentric;
 import dev.nextftc.hardware.driving.HolonomicMode;
 import dev.nextftc.hardware.driving.MecanumDriverControlled;
 import dev.nextftc.hardware.impl.Direction;
@@ -26,6 +28,9 @@ import dev.nextftc.hardware.impl.IMUEx;
 import dev.nextftc.hardware.impl.MotorEx;
 
 public class Drive implements Subsystem {
+    public static final Drive INSTANCE = new Drive();
+    private Drive() {};
+
     // put hardware, commands, etc here
     private MotorEx leftFront = new MotorEx(Constants.Drive.leftFront).brakeMode().reversed();
     private MotorEx leftBack = new MotorEx(Constants.Drive.leftBack).brakeMode().reversed();
@@ -37,23 +42,14 @@ public class Drive implements Subsystem {
             RevHubOrientationOnRobot.LogoFacingDirection.UP,
             RevHubOrientationOnRobot.UsbFacingDirection.LEFT));
 
-    public Drive(HardwareMap hwMap) {
-        /*leftFront = hwMap.get(DcMotor.class, Constants.Drive.leftFront);
-        leftBack = hwMap.get(DcMotor.class, Constants.Drive.leftBack);
-        rightFront = hwMap.get(DcMotor.class, Constants.Drive.rightFront);
-        rightBack = hwMap.get(DcMotor.class, Constants.Drive.rightBack);*/
-
-        odo = hwMap.get(GoBildaPinpointDriver.class, Constants.Drive.pinpoint);
-        //imu = hwMap.get(IMU.class, "imu");
-    }
-
     @Override
     public void initialize() {
         // initialization logic (runs on init)
+        odo = ActiveOpMode.hardwareMap().get(GoBildaPinpointDriver.class, Constants.Drive.pinpoint);
         odo.setOffsets(Constants.Drive.odomXOffset, Constants.Drive.odomYOffset, DistanceUnit.INCH);
         odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD);
         odo.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
-        odo.recalibrateIMU();
+        odo.resetPosAndIMU();
     }
 
     @Override
@@ -102,7 +98,7 @@ public class Drive implements Subsystem {
         return new LambdaCommand()
                 .setRequirements(this)
                 .setUpdate(() -> {
-                    double y = gamepad1.leftStickY().get();
+                    double y = gamepad1.leftStickY().negate().get();
                     double x = gamepad1.leftStickX().get();
                     double rx = gamepad1.rightStickX().get();
 

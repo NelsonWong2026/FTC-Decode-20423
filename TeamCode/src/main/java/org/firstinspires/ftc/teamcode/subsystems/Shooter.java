@@ -35,6 +35,9 @@ import dev.nextftc.hardware.impl.ServoEx;
 
 
 public class Shooter implements Subsystem {
+    public static final Shooter INSTANCE = new Shooter();
+    private Shooter() {};
+
     private MotorEx topFlyWheel = new MotorEx(Constants.Shooter.topFlyWheel).floatMode();
     private MotorEx bottomFlyWheel = new MotorEx(Constants.Shooter.bottomFlyWheel).floatMode();
     private ServoEx blocker = new ServoEx(Constants.Shooter.blocker);
