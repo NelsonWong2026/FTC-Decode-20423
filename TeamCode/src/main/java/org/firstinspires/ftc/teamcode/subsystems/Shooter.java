@@ -42,6 +42,8 @@ public class Shooter implements Subsystem {
     private MotorEx bottomFlyWheel = new MotorEx(Constants.Shooter.bottomFlyWheel).floatMode();
     private ServoEx blocker = new ServoEx(Constants.Shooter.blocker);
     private DoubleSupplier bottomEncoder, topEncoder;
+    /*private DcMotorEx topWheel = ActiveOpMode.hardwareMap().get(DcMotorEx.class, Constants.Shooter.topFlyWheel);
+    private DcMotorEx bottomWheel = ActiveOpMode.hardwareMap().get(DcMotorEx.class, Constants.Shooter.bottomFlyWheel);*/
 
     private final TelemetryManager panels = PanelsTelemetry.INSTANCE.getTelemetry();
     private double targetVel = 0.0;
@@ -53,37 +55,47 @@ public class Shooter implements Subsystem {
             .basicFF(TOP_SHOOTER_FF)
             .build();
 
-    /*private ControlSystem bottomFlywheelControlSystem = ControlSystem.builder()
+    private ControlSystem topFlywheelControlSystem = ControlSystem.builder()
+            .velPid(TOP_SHOOTER_P, TOP_SHOOTER_I, TOP_SHOOTER_D)
+            .basicFF(TOP_SHOOTER_FF)
+            .build();
+
+    private ControlSystem bottomFlywheelControlSystem = ControlSystem.builder()
             .velPid(BOTTOM_SHOOTER_P, BOTTOM_SHOOTER_I, BOTTOM_SHOOTER_D)
             .basicFF(BOTTOM_SHOOTER_FF)
-            .build();*/
+            .build();
 
 
     @Override
     public void initialize() {
         // initialization logic (runs on init)
+        /*topWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        bottomWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);*/
     }
 
     @Override
     public void periodic() {
         // periodic logic (runs every loop)
         if (flywheelsEnabled) {
-            flywheelControlSystem.setGoal(new KineticState(0.0, targetVel));
-            /*topFlywheelControlSystem.setGoal(new KineticState(0.0, targetVel));
-            bottomFlywheelControlSystem.setGoal(new KineticState(0.0, targetVel));*/
+            //flywheelControlSystem.setGoal(new KineticState(0.0, targetVel));
+            topFlywheelControlSystem.setGoal(new KineticState(0.0, targetVel));
+            bottomFlywheelControlSystem.setGoal(new KineticState(0.0, targetVel));
         }
         else {
-            flywheelControlSystem.setGoal(new KineticState(0.0, 0.0));
-            /*topFlywheelControlSystem.setGoal(new KineticState(0.0, 0.0));
-            bottomFlywheelControlSystem.setGoal(new KineticState(0.0, 0.0));*/
+            //flywheelControlSystem.setGoal(new KineticState(0.0, 0.0));
+            topFlywheelControlSystem.setGoal(new KineticState(0.0, 0.0));
+            bottomFlywheelControlSystem.setGoal(new KineticState(0.0, 0.0));
         }
 
-        double power = flywheelControlSystem.calculate(new KineticState(topFlyWheel.getCurrentPosition(), topFlyWheel.getVelocity()));
-        topFlyWheel.setPower(power);
-        bottomFlyWheel.setPower(power);
+        topFlyWheel.setPower(topFlywheelControlSystem.calculate(new KineticState(topFlyWheel.getCurrentPosition(), topFlyWheel.getVelocity())));
+        bottomFlyWheel.setPower(bottomFlywheelControlSystem.calculate(new KineticState(bottomFlyWheel.getCurrentPosition(), bottomFlyWheel.getVelocity())));
+        /*double power = flywheelControlSystem.calculate(new KineticState(topFlyWheel.getCurrentPosition(), topFlyWheel.getVelocity()));
+        bottomFlyWheel.setPower(power);*/
 
         ActiveOpMode.telemetry().addData("targetVelo", targetVel);
-        ActiveOpMode.telemetry().addData("flywheel goal", flywheelControlSystem.getGoal());
+        //ActiveOpMode.telemetry().addData("flywheel goal", flywheelControlSystem.getGoal());
+        ActiveOpMode.telemetry().addData("top flywheel goal", topFlywheelControlSystem.getGoal());
+        ActiveOpMode.telemetry().addData("bottom flywheel goal", bottomFlywheelControlSystem.getGoal());
     }
 
     public double calculateShooterVelocity(double distance) {
@@ -95,6 +107,11 @@ public class Shooter implements Subsystem {
         //need to experimentally find
         return v;
     }
+
+    /*public void setVelocity(double velocity) {
+        topWheel.setVelocity(velocity);
+        bottomWheel.setVelocity(velocity);
+    }*/
 
     //set Target method
     public void setTargetVelocity(double target) {

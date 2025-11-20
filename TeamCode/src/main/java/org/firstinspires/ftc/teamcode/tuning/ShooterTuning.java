@@ -29,11 +29,11 @@ public class ShooterTuning extends NextFTCOpMode {
     public static double blockerPos = Constants.Shooter.CLEAR_POS;
     public static double shooterVelocity = 0;
 
-    {
+    public ShooterTuning() {
         addComponents(
+                new SubsystemComponent(Drive.INSTANCE, Intake.INSTANCE, Shooter.INSTANCE, Vision.INSTANCE),
                 BindingsComponent.INSTANCE,
-                BulkReadComponent.INSTANCE,
-                new SubsystemComponent(Drive.INSTANCE, Intake.INSTANCE, Shooter.INSTANCE, Vision.INSTANCE)
+                BulkReadComponent.INSTANCE
         );
     }
 

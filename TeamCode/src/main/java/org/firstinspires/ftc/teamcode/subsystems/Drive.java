@@ -73,6 +73,10 @@ public class Drive implements Subsystem {
         );
     }
 
+    public GoBildaPinpointDriver getPinpoint() {
+        return odo;
+    }
+
     public Command driveForward() {
         return new LambdaCommand()
                 .setStart(() -> {
