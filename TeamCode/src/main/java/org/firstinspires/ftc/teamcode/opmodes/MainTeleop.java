@@ -2,9 +2,12 @@ package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -24,8 +27,11 @@ import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
+import dev.nextftc.hardware.driving.DriverControlledCommand;
 import dev.nextftc.hardware.driving.FieldCentric;
 import dev.nextftc.hardware.driving.MecanumDriverControlled;
+import dev.nextftc.hardware.impl.Direction;
+import dev.nextftc.hardware.impl.IMUEx;
 import dev.nextftc.hardware.impl.MotorEx;
 
 @TeleOp(name = "Main Teleop")
@@ -46,7 +52,20 @@ public class MainTeleop extends NextFTCOpMode {
 
     @Override
     public void onInit() {
-        Drive.INSTANCE.driveCommand(true).schedule();
+
+    }
+
+    @Override
+    public void onStartButtonPressed() {
+        MecanumDriverControlled driveControlled = Drive.INSTANCE.driveControlled(true);
+        driveControlled.schedule();
+
+        Gamepads.gamepad1().rightBumper()
+                        .whenBecomesTrue(() -> driveControlled.setScalar(0.4))
+                        .whenBecomesFalse(() -> driveControlled.setScalar(1));
+
+        Gamepads.gamepad1().a()
+                        .whenBecomesTrue(Drive.INSTANCE::zeroPinpoint);
 
         Gamepads.gamepad2().dpadUp()
                 .whenBecomesTrue(Intake.INSTANCE.setIntake())
@@ -54,32 +73,23 @@ public class MainTeleop extends NextFTCOpMode {
         Gamepads.gamepad2().dpadDown()
                 .whenBecomesTrue(Intake.INSTANCE.setOuttake())
                 .whenBecomesFalse(Intake.INSTANCE.stopIntake());
+        Gamepads.gamepad2().x()
+                .whenBecomesTrue(Shooter.INSTANCE.setShooterTargetVelocity(1300))
+                .whenBecomesFalse(Shooter.INSTANCE.disableFlyWheelPID());
+        Gamepads.gamepad2().y()
+                .whenBecomesTrue(Shooter.INSTANCE.setIntake())
+                .whenBecomesFalse(Shooter.INSTANCE.stopShooter());
         Gamepads.gamepad2().leftBumper()
-                .whenBecomesTrue(Shooter.INSTANCE.blockBall())
-                .whenBecomesFalse(Shooter.INSTANCE.unblockBall());
-        /*Gamepads.gamepad2().rightBumper()
-                .whenBecomesTrue(new ParallelGroup(
-                        //Shooter.INSTANCE.launchBall()
-                        //Shooter.INSTANCE.unblockBall()
-                ))
-                .whenBecomesFalse(new ParallelGroup(
-                        //Shooter.INSTANCE.resetBallLauncher()
-                        //Shooter.INSTANCE.blockBall()
-                ));*/
+                .whenBecomesTrue(Shooter.INSTANCE.unblockBall())
+                .whenBecomesFalse(Shooter.INSTANCE.blockBall());
 
         Vision.INSTANCE.startLimelight();
     }
 
     @Override
-    public void onStartButtonPressed() {
-
-    }
-
-    @Override
     public void onUpdate() {
-        Vision.INSTANCE.updateOrientationWithIMU();
         llResult = Vision.INSTANCE.getLLResult();
-        if (llResult.isValid() && llResult != null) {
+        if (llResult != null && llResult.isValid()) {
             botPose = Vision.INSTANCE.getLLResult().getBotpose_MT2();
             joinedTelemetry.addData("Distance", llResult.getBotposeAvgDist());
             joinedTelemetry.addData("YDegreesAway", llResult.getTy());
@@ -92,12 +102,12 @@ public class MainTeleop extends NextFTCOpMode {
 //        Pose2D botpose = Vision.INSTANCE.getBotPose();
 //        telemetry.addData("Bot Pose", "X: %d, Y: %d, Heading: %d",
 //                botpose.getX(DistanceUnit.METER), botpose.getY(DistanceUnit.METER), botpose.getHeading(AngleUnit.DEGREES));
-        telemetry.addData("Top Flywheel Distance", "%.3f rot", Shooter.INSTANCE.getTopFlywheelDistance());
-        telemetry.addData("Bottom Flywheel Distance","%.3f rot", Shooter.INSTANCE.getBottomFlywheelDistance());
-        telemetry.addData("Top Flywheel Velocity","%.3f RPM", Shooter.INSTANCE.getTopFlywheelVelocity());
-        telemetry.addData("Bottom Flywheel Velocity","%.3f RPM", Shooter.INSTANCE.getBottomFlywheelVelocity());
-        telemetry.addData("Pinpoint Position", Drive.INSTANCE.getPinpointPosition());
-        telemetry.update();
+        joinedTelemetry.addData("Top Flywheel Distance", "%.3f rot", Shooter.INSTANCE.getTopFlywheelDistance());
+        joinedTelemetry.addData("Bottom Flywheel Distance","%.3f rot", Shooter.INSTANCE.getBottomFlywheelDistance());
+        joinedTelemetry.addData("Top Flywheel Velocity","%.3f RPM", Shooter.INSTANCE.getTopFlywheelVelocity());
+        joinedTelemetry.addData("Bottom Flywheel Velocity","%.3f RPM", Shooter.INSTANCE.getBottomFlywheelVelocity());
+        joinedTelemetry.addData("Pinpoint Position", Drive.INSTANCE.getPinpointPosition());
+        joinedTelemetry.update();
     }
 
     @Override

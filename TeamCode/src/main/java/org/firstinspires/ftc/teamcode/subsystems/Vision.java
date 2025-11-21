@@ -8,6 +8,7 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.Constants;
@@ -23,20 +24,17 @@ public class Vision implements Subsystem {
     private Vision() {};
 
     private Limelight3A limelight;
-    private IMUEx imu = new IMUEx("imu", Direction.UP, Direction.LEFT);
-    private GoBildaPinpointDriver odo;
 
     @Override
     public void initialize() {
         // initialization logic (runs on init)
-        odo = ActiveOpMode.hardwareMap().get(GoBildaPinpointDriver.class, Constants.Drive.pinpoint);
         limelight = ActiveOpMode.hardwareMap().get(Limelight3A.class, Constants.Vision.limelight);
     }
 
     @Override
     public void periodic() {
         // periodic logic (runs every loop)
-        odo.update();
+        updateOrientationWithPinpoint();
     }
 
     public void startLimelight() {
@@ -49,8 +47,7 @@ public class Vision implements Subsystem {
 
     public Pose3D getBotPose() {
         LLResult result = limelight.getLatestResult();
-        YawPitchRollAngles orientation = imu.getImu().getRobotYawPitchRollAngles();
-        limelight.updateRobotOrientation(orientation.getYaw());
+        limelight.updateRobotOrientation(Drive.INSTANCE.getPinpointHeading());
         if (result != null && result.isValid()) {
             return result.getBotpose_MT2();
         }
@@ -79,8 +76,11 @@ public class Vision implements Subsystem {
     }
 
     public void updateOrientationWithIMU() {
-        YawPitchRollAngles orientation = imu.getImu().getRobotYawPitchRollAngles();
-        limelight.updateRobotOrientation(orientation.getYaw());
+        limelight.updateRobotOrientation(Drive.INSTANCE.getIMUOrientation().getYaw());
+    }
+
+    public void updateOrientationWithPinpoint() {
+        limelight.updateRobotOrientation(Drive.INSTANCE.getPinpointHeading());
     }
 
 

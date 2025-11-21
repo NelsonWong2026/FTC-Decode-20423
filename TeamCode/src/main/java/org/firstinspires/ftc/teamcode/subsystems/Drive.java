@@ -12,11 +12,15 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.Constants;
+
+import java.util.function.Supplier;
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.Subsystem;
+import dev.nextftc.core.units.Angle;
 import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.ftc.GamepadEx;
 import dev.nextftc.ftc.Gamepads;
@@ -55,26 +59,63 @@ public class Drive implements Subsystem {
     @Override
     public void periodic() {
         // periodic logic (runs every loop)
+        odo.update();
     }
 
     public Pose2D getPinpointPosition() {
         return odo.getPosition();
     }
 
-    public Command driveControlled() {
-        return new MecanumDriverControlled(
-                leftFront,
-                rightFront,
-                leftBack,
-                rightBack,
-                Gamepads.gamepad1().leftStickY().negate(),
-                Gamepads.gamepad1().leftStickX(),
-                Gamepads.gamepad1().rightStickX()
-        );
+    public MecanumDriverControlled driveControlled(boolean isFieldCentric) {
+        if (isFieldCentric) {
+            return new MecanumDriverControlled(
+                    leftFront,
+                    rightFront,
+                    leftBack,
+                    rightBack,
+                    Gamepads.gamepad1().leftStickY().negate(),
+                    Gamepads.gamepad1().leftStickX(),
+                    Gamepads.gamepad1().rightStickX(),
+                    new FieldCentric(new Supplier<Angle>() {
+                        @Override
+                        public Angle get() {
+                            return Angle.fromRad(odo.getHeading(AngleUnit.RADIANS));
+                        }
+                    })
+            );
+        }
+        else {
+            return new MecanumDriverControlled(
+                    leftFront,
+                    rightFront,
+                    leftBack,
+                    rightBack,
+                    Gamepads.gamepad1().leftStickY().negate(),
+                    Gamepads.gamepad1().leftStickX(),
+                    Gamepads.gamepad1().rightStickX()
+            );
+        }
+
     }
 
     public GoBildaPinpointDriver getPinpoint() {
         return odo;
+    }
+
+    public YawPitchRollAngles getIMUOrientation() {
+        return imu.getImu().getRobotYawPitchRollAngles();
+    }
+
+    public void zeroPinpoint() {
+        odo.resetPosAndIMU();
+    }
+
+    public void updatePinpoint() {
+        odo.update();
+    }
+
+    public double getPinpointHeading() {
+        return odo.getHeading(AngleUnit.RADIANS);
     }
 
     public Command driveForward() {
@@ -95,71 +136,6 @@ public class Drive implements Subsystem {
                     rightFront.setPower(0);
                     rightBack.setPower(0);
                 });
-    }
-
-    public Command driveCommand(boolean isFieldCentric) {
-        GamepadEx gamepad1 = Gamepads.gamepad1();
-        return new LambdaCommand()
-                .setRequirements(this)
-                .setUpdate(() -> {
-                    double y = gamepad1.leftStickY().negate().get();
-                    double x = gamepad1.leftStickX().get();
-                    double rx = gamepad1.rightStickX().get();
-
-                    if (gamepad1.a().toggleOnBecomesTrue().get()) {
-                        imu.zeroed();
-                    }
-
-                    double botHeading = imu.get().inRad;
-
-                    // Rotate the movement direction counter to the bot's rotation
-                    double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
-                    double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
-
-                    rotX *= 1.1;
-
-                    double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
-                    double frontLeftPower = (rotY + rotX + rx) / denominator;
-                    double backLeftPower = (rotY - rotX + rx) / denominator;
-                    double frontRightPower = (rotY - rotX - rx) / denominator;
-                    double backRightPower = (rotY + rotX - rx) / denominator;
-
-                    double denominator2 = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-                    double frontLeftPower2 = (y + x + rx) / denominator;
-                    double backLeftPower2 = (y - x + rx) / denominator;
-                    double frontRightPower2 = (y - x - rx) / denominator;
-                    double backRightPower2 = (y + x - rx) / denominator;
-
-                    if (isFieldCentric && gamepad1.rightBumper().get()) {
-                        leftFront.setPower(frontLeftPower / 4);
-                        leftBack.setPower(backLeftPower / 4);
-                        rightFront.setPower(frontRightPower / 4);
-                        rightBack.setPower(backRightPower / 4);
-                    }
-                    else if (isFieldCentric) {
-                        leftFront.setPower(frontLeftPower);
-                        leftBack.setPower(backLeftPower);
-                        rightFront.setPower(frontRightPower);
-                        rightBack.setPower(backRightPower);
-                    }
-                    else if (gamepad1.rightBumper().get()) {
-                        leftFront.setPower(frontLeftPower2);
-                        leftBack.setPower(backLeftPower2);
-                        rightFront.setPower(frontRightPower2);
-                        rightBack.setPower(backRightPower2);
-                    }
-                    else {
-                        leftFront.setPower(frontLeftPower2);
-                        leftBack.setPower(backLeftPower2);
-                        rightFront.setPower(frontRightPower2);
-                        rightBack.setPower(backRightPower2);
-                    }
-                    /*leftFront.setPower(y);
-                    leftBack.setPower(y);
-                    rightFront.setPower(-gamepad1.rightStickY().state());
-                    rightBack.setPower(-gamepad1.rightStickY().state());*/
-                })
-                .setIsDone(() -> false);
     }
 
     public LambdaCommand tankDriveCommand() {

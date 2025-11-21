@@ -20,6 +20,7 @@ import dev.nextftc.ftc.GamepadEx;
 import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
+import dev.nextftc.hardware.driving.MecanumDriverControlled;
 
 import static dev.nextftc.bindings.Bindings.*;
 
@@ -40,8 +41,19 @@ public class ShooterTuning extends NextFTCOpMode {
     @Override
     public void onInit() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+    }
 
-        Drive.INSTANCE.driveCommand(true).schedule();
+    @Override
+    public void onStartButtonPressed() {
+        MecanumDriverControlled driveControlled = Drive.INSTANCE.driveControlled(true);
+        driveControlled.schedule();
+
+        Gamepads.gamepad1().rightBumper()
+                .whenBecomesTrue(() -> driveControlled.setScalar(0.4))
+                .whenBecomesFalse(() -> driveControlled.setScalar(1));
+
+        Gamepads.gamepad1().a()
+                .whenBecomesTrue(Drive.INSTANCE::zeroPinpoint);
 
         Gamepads.gamepad2().dpadUp()
                 .whenBecomesTrue(Intake.INSTANCE.setIntake())
@@ -50,8 +62,8 @@ public class ShooterTuning extends NextFTCOpMode {
                 .whenBecomesTrue(Intake.INSTANCE.setOuttake())
                 .whenBecomesFalse(Intake.INSTANCE.stopIntake());
         Gamepads.gamepad2().leftBumper()
-                .whenBecomesTrue(Shooter.INSTANCE.blockBall())
-                .whenBecomesFalse(Shooter.INSTANCE.unblockBall());
+                .whenBecomesTrue(Shooter.INSTANCE.unblockBall())
+                .whenBecomesFalse(Shooter.INSTANCE.blockBall());
         /*Gamepads.gamepad2().rightBumper()
                 .whenBecomesTrue(new ParallelGroup(
                         //Shooter.INSTANCE.launchBall()

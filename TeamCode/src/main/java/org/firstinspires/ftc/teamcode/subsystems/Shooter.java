@@ -12,11 +12,13 @@ import static org.firstinspires.ftc.teamcode.config.ShooterPIDF.TOP_SHOOTER_P;
 
 import androidx.annotation.NonNull;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
@@ -27,13 +29,16 @@ import java.util.function.DoubleSupplier;
 
 import dev.nextftc.control.ControlSystem;
 import dev.nextftc.control.KineticState;
+import dev.nextftc.control.feedback.PIDCoefficients;
+import dev.nextftc.control.feedforward.BasicFeedforwardParameters;
+import dev.nextftc.control.feedforward.FeedforwardElement;
 import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.hardware.impl.ServoEx;
 
-
+@Config
 public class Shooter implements Subsystem {
     public static final Shooter INSTANCE = new Shooter();
     private Shooter() {};
@@ -41,54 +46,62 @@ public class Shooter implements Subsystem {
     private MotorEx topFlyWheel = new MotorEx(Constants.Shooter.topFlyWheel).floatMode();
     private MotorEx bottomFlyWheel = new MotorEx(Constants.Shooter.bottomFlyWheel).floatMode();
     private ServoEx blocker = new ServoEx(Constants.Shooter.blocker);
-    private DoubleSupplier bottomEncoder, topEncoder;
-    /*private DcMotorEx topWheel = ActiveOpMode.hardwareMap().get(DcMotorEx.class, Constants.Shooter.topFlyWheel);
-    private DcMotorEx bottomWheel = ActiveOpMode.hardwareMap().get(DcMotorEx.class, Constants.Shooter.bottomFlyWheel);*/
 
     private final TelemetryManager panels = PanelsTelemetry.INSTANCE.getTelemetry();
     private double targetVel = 0.0;
     private boolean flywheelsEnabled = false;
 
+    public static PIDCoefficients topFlyWheelPID = new PIDCoefficients(
+            TOP_SHOOTER_P, TOP_SHOOTER_I, TOP_SHOOTER_D
+    );
+    public static PIDCoefficients bottomFlyWheelPID = new PIDCoefficients(
+            BOTTOM_SHOOTER_P, BOTTOM_SHOOTER_I, BOTTOM_SHOOTER_D
+    );
+
+    public static BasicFeedforwardParameters topFlyWheelFeedforward = new BasicFeedforwardParameters(TOP_SHOOTER_FF);
+    public static BasicFeedforwardParameters bottomFlyWheelFeedforward = new BasicFeedforwardParameters(BOTTOM_SHOOTER_FF);
 
     private ControlSystem flywheelControlSystem = ControlSystem.builder()
-            .velPid(TOP_SHOOTER_P, TOP_SHOOTER_I, TOP_SHOOTER_D)
-            .basicFF(TOP_SHOOTER_FF)
+            .velPid(topFlyWheelPID)
+            .basicFF(topFlyWheelFeedforward)
             .build();
 
     private ControlSystem topFlywheelControlSystem = ControlSystem.builder()
-            .velPid(TOP_SHOOTER_P, TOP_SHOOTER_I, TOP_SHOOTER_D)
-            .basicFF(TOP_SHOOTER_FF)
+            .velPid(topFlyWheelPID)
+            .basicFF(topFlyWheelFeedforward)
             .build();
 
     private ControlSystem bottomFlywheelControlSystem = ControlSystem.builder()
-            .velPid(BOTTOM_SHOOTER_P, BOTTOM_SHOOTER_I, BOTTOM_SHOOTER_D)
-            .basicFF(BOTTOM_SHOOTER_FF)
+            .velPid(bottomFlyWheelPID)
+            .basicFF(bottomFlyWheelFeedforward)
             .build();
 
 
     @Override
     public void initialize() {
         // initialization logic (runs on init)
-        /*topWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        /*private DcMotorEx topWheel = ActiveOpMode.hardwareMap().get(DcMotorEx.class, Constants.Shooter.topFlyWheel);
+        private DcMotorEx bottomWheel = ActiveOpMode.hardwareMap().get(DcMotorEx.class, Constants.Shooter.bottomFlyWheel);
+        topWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         bottomWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);*/
     }
 
     @Override
     public void periodic() {
         // periodic logic (runs every loop)
+        //flywheelControlSystem.setGoal(new KineticState(0.0, targetVel));
+        topFlywheelControlSystem.setGoal(new KineticState(0.0, targetVel));
+        bottomFlywheelControlSystem.setGoal(new KineticState(0.0, targetVel));
         if (flywheelsEnabled) {
-            //flywheelControlSystem.setGoal(new KineticState(0.0, targetVel));
-            topFlywheelControlSystem.setGoal(new KineticState(0.0, targetVel));
-            bottomFlywheelControlSystem.setGoal(new KineticState(0.0, targetVel));
+            topFlyWheel.setPower(topFlywheelControlSystem.calculate(new KineticState(topFlyWheel.getCurrentPosition(), topFlyWheel.getVelocity())));
+            bottomFlyWheel.setPower(bottomFlywheelControlSystem.calculate(new KineticState(bottomFlyWheel.getCurrentPosition(), bottomFlyWheel.getVelocity())));
         }
         else {
-            //flywheelControlSystem.setGoal(new KineticState(0.0, 0.0));
+            /*//flywheelControlSystem.setGoal(new KineticState(0.0, 0.0));
             topFlywheelControlSystem.setGoal(new KineticState(0.0, 0.0));
-            bottomFlywheelControlSystem.setGoal(new KineticState(0.0, 0.0));
+            bottomFlywheelControlSystem.setGoal(new KineticState(0.0, 0.0));*/
         }
 
-        topFlyWheel.setPower(topFlywheelControlSystem.calculate(new KineticState(topFlyWheel.getCurrentPosition(), topFlyWheel.getVelocity())));
-        bottomFlyWheel.setPower(bottomFlywheelControlSystem.calculate(new KineticState(bottomFlyWheel.getCurrentPosition(), bottomFlyWheel.getVelocity())));
         /*double power = flywheelControlSystem.calculate(new KineticState(topFlyWheel.getCurrentPosition(), topFlyWheel.getVelocity()));
         bottomFlyWheel.setPower(power);*/
 
@@ -128,11 +141,15 @@ public class Shooter implements Subsystem {
     }
 
     public double getTopFlywheelDistance() {
-        return topEncoder.getAsDouble() / shooterTicksPerRevolution;
+        return topFlyWheel.getCurrentPosition() / shooterTicksPerRevolution;
     }
 
     public double getBottomFlywheelDistance() {
-        return bottomEncoder.getAsDouble() / shooterTicksPerRevolution;
+        return bottomFlyWheel.getCurrentPosition() / shooterTicksPerRevolution;
+    }
+
+    public void disableFlyWheels() {
+        flywheelsEnabled = false;
     }
 
     public void setBlocker() {
@@ -165,6 +182,14 @@ public class Shooter implements Subsystem {
         bottomFlyWheel.setPower(0);
     }
 
+    public LambdaCommand disableFlyWheelPID() {
+        return new LambdaCommand()
+                .setStart(() -> {
+                    disableFlyWheels();
+                    stopShooter();
+                });
+    }
+
     public LambdaCommand setIntake() {
         return new LambdaCommand()
                 .setStart(this::intake);
@@ -183,7 +208,11 @@ public class Shooter implements Subsystem {
     public LambdaCommand setShooterTargetVelocity(double target) {
         return new LambdaCommand()
                 .setStart(() -> setTargetVelocity(target))
-                .setIsDone(() -> flywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, 30.0, Double.POSITIVE_INFINITY)));
+                .setIsDone(() -> (
+                        topFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, 25.0, Double.POSITIVE_INFINITY)) &&
+                        bottomFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, 25.0, Double.POSITIVE_INFINITY))
+                        )
+                );
     }
 
     public LambdaCommand blockBall() {

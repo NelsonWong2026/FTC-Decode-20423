@@ -25,7 +25,6 @@ public class Intake implements Subsystem {
     private Intake() {};
 
     private MotorEx intake = new MotorEx(Constants.Intake.intake);
-    private double encoder = intake.getCurrentPosition();
 
     public void intake() {
         intake.setPower(Constants.Intake.intakeSpeed);
