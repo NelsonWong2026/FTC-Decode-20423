@@ -33,9 +33,14 @@ public class Constants {
         public static final double BLOCK_POS = 0;
         public static final double CLEAR_POS = 0.27;
 
-        public static final double PIVOT_P = 0.0;
-        public static final double PIVOT_I = 0.0;
-        public static final double PIVOT_D = 0.0;
+        public static final double FAR_SHOOTER_RPM = 3500;
+        public static final double NEAR_SHOOTER_RPM = 0;
+
+        public static final double FAR_SHOOTER_TOP_RPM = 1400;
+        public static final double FAR_SHOOTER_BOTTOM_RPM = 1900;
+
+        public static final double NEAR_SHOOTER_TOP_RPM = 1500;
+        public static final double NEAR_SHOOTER_BOTTOM_RPM = 1500;
     }
 
     public static final class Intake {

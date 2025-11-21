@@ -74,11 +74,24 @@ public class MainTeleop extends NextFTCOpMode {
                 .whenBecomesTrue(Intake.INSTANCE.setOuttake())
                 .whenBecomesFalse(Intake.INSTANCE.stopIntake());
         Gamepads.gamepad2().x()
-                .whenBecomesTrue(Shooter.INSTANCE.setShooterTargetVelocity(1300))
-                .whenBecomesFalse(Shooter.INSTANCE.disableFlyWheelPID());
+                .whenBecomesTrue(Shooter.INSTANCE.setOuttake())
+                .whenBecomesFalse(Shooter.INSTANCE.stopShooter());
         Gamepads.gamepad2().y()
                 .whenBecomesTrue(Shooter.INSTANCE.setIntake())
                 .whenBecomesFalse(Shooter.INSTANCE.stopShooter());
+        Gamepads.gamepad2().a()
+                .whenBecomesTrue(Shooter.INSTANCE.setShooterTargetVelocity(Constants.Shooter.NEAR_SHOOTER_TOP_RPM, Constants.Shooter.NEAR_SHOOTER_BOTTOM_RPM))
+                .whenBecomesFalse(() -> {
+                    Shooter.INSTANCE.disableFlyWheelPID();
+                    Shooter.INSTANCE.stopShooter();
+                });
+        Gamepads.gamepad2().b()
+                .whenBecomesTrue(Shooter.INSTANCE.setShooterTargetVelocity(Constants.Shooter.FAR_SHOOTER_TOP_RPM, Constants.Shooter.FAR_SHOOTER_BOTTOM_RPM))
+                .whenBecomesFalse(() -> {
+                    Shooter.INSTANCE.disableFlyWheelPID();
+                    Shooter.INSTANCE.stopShooter();
+                });
+
         Gamepads.gamepad2().leftBumper()
                 .whenBecomesTrue(Shooter.INSTANCE.unblockBall())
                 .whenBecomesFalse(Shooter.INSTANCE.blockBall());
@@ -97,16 +110,16 @@ public class MainTeleop extends NextFTCOpMode {
             joinedTelemetry.addData("Y Pos", botPose.getPosition().y);
             joinedTelemetry.addData("Rot", botPose.getOrientation().getYaw());
         }
-        joinedTelemetry.addData("BotPose", botPose);
+        //joinedTelemetry.addData("BotPose", botPose);
         joinedTelemetry.update();
 //        Pose2D botpose = Vision.INSTANCE.getBotPose();
 //        telemetry.addData("Bot Pose", "X: %d, Y: %d, Heading: %d",
 //                botpose.getX(DistanceUnit.METER), botpose.getY(DistanceUnit.METER), botpose.getHeading(AngleUnit.DEGREES));
-        joinedTelemetry.addData("Top Flywheel Distance", "%.3f rot", Shooter.INSTANCE.getTopFlywheelDistance());
-        joinedTelemetry.addData("Bottom Flywheel Distance","%.3f rot", Shooter.INSTANCE.getBottomFlywheelDistance());
+        //joinedTelemetry.addData("Top Flywheel Distance", "%.3f rot", Shooter.INSTANCE.getTopFlywheelDistance());
+        //joinedTelemetry.addData("Bottom Flywheel Distance","%.3f rot", Shooter.INSTANCE.getBottomFlywheelDistance());
         joinedTelemetry.addData("Top Flywheel Velocity","%.3f RPM", Shooter.INSTANCE.getTopFlywheelVelocity());
         joinedTelemetry.addData("Bottom Flywheel Velocity","%.3f RPM", Shooter.INSTANCE.getBottomFlywheelVelocity());
-        joinedTelemetry.addData("Pinpoint Position", Drive.INSTANCE.getPinpointPosition());
+        //joinedTelemetry.addData("Pinpoint Position", Drive.INSTANCE.getPinpointPosition());
         joinedTelemetry.update();
     }
 

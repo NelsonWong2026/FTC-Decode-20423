@@ -29,6 +29,8 @@ import static dev.nextftc.bindings.Bindings.*;
 public class ShooterTuning extends NextFTCOpMode {
     public static double blockerPos = Constants.Shooter.CLEAR_POS;
     public static double shooterVelocity = 0;
+    public static double topShooterVelocity = 0;
+    public static double bottomShooterVelocity = 0;
 
     public ShooterTuning() {
         addComponents(
@@ -54,7 +56,15 @@ public class ShooterTuning extends NextFTCOpMode {
 
         Gamepads.gamepad1().a()
                 .whenBecomesTrue(Drive.INSTANCE::zeroPinpoint);
-
+        Gamepads.gamepad2().x()
+                .whenBecomesTrue(Shooter.INSTANCE.setShooterTargetVelocity(Constants.Shooter.FAR_SHOOTER_TOP_RPM, Constants.Shooter.FAR_SHOOTER_BOTTOM_RPM))
+                .whenBecomesFalse(Shooter.INSTANCE.disableFlyWheelPID());
+        Gamepads.gamepad2().y()
+                .whenBecomesTrue(Shooter.INSTANCE.setIntake())
+                .whenBecomesFalse(Shooter.INSTANCE.stopShooter());
+        Gamepads.gamepad2().a()
+                .whenBecomesTrue(Shooter.INSTANCE.setShooterTargetVelocity(Constants.Shooter.NEAR_SHOOTER_TOP_RPM, Constants.Shooter.NEAR_SHOOTER_BOTTOM_RPM))
+                .whenBecomesFalse(Shooter.INSTANCE.disableFlyWheelPID());
         Gamepads.gamepad2().dpadUp()
                 .whenBecomesTrue(Intake.INSTANCE.setIntake())
                 .whenBecomesFalse(Intake.INSTANCE.stopIntake());
@@ -79,7 +89,8 @@ public class ShooterTuning extends NextFTCOpMode {
     public void onUpdate() {
         //shooter.launcherPosition(launcherPos);
         //shooter.blockerPosition(blockerPos);
-        Shooter.INSTANCE.setTargetVelocity(shooterVelocity);
+        Shooter.INSTANCE.setTopTargetVelocity(topShooterVelocity);
+        Shooter.INSTANCE.setBottomTargetVelocity(bottomShooterVelocity);
         telemetry.addData("Target Velocity", shooterVelocity);
         telemetry.addData("Top Flywheel Velocity", Shooter.INSTANCE.getTopFlywheelVelocity());
         telemetry.addData("Bottom Flywheel Velocity", Shooter.INSTANCE.getBottomFlywheelVelocity());

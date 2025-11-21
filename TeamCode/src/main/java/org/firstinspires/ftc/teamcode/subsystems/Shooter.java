@@ -40,17 +40,6 @@ import dev.nextftc.hardware.impl.ServoEx;
 
 @Config
 public class Shooter implements Subsystem {
-    public static final Shooter INSTANCE = new Shooter();
-    private Shooter() {};
-
-    private MotorEx topFlyWheel = new MotorEx(Constants.Shooter.topFlyWheel).floatMode();
-    private MotorEx bottomFlyWheel = new MotorEx(Constants.Shooter.bottomFlyWheel).floatMode();
-    private ServoEx blocker = new ServoEx(Constants.Shooter.blocker);
-
-    private final TelemetryManager panels = PanelsTelemetry.INSTANCE.getTelemetry();
-    private double targetVel = 0.0;
-    private boolean flywheelsEnabled = false;
-
     public static PIDCoefficients topFlyWheelPID = new PIDCoefficients(
             TOP_SHOOTER_P, TOP_SHOOTER_I, TOP_SHOOTER_D
     );
@@ -60,6 +49,19 @@ public class Shooter implements Subsystem {
 
     public static BasicFeedforwardParameters topFlyWheelFeedforward = new BasicFeedforwardParameters(TOP_SHOOTER_FF);
     public static BasicFeedforwardParameters bottomFlyWheelFeedforward = new BasicFeedforwardParameters(BOTTOM_SHOOTER_FF);
+
+    public static final Shooter INSTANCE = new Shooter();
+    private Shooter() {};
+
+    private MotorEx topFlyWheel = new MotorEx(Constants.Shooter.topFlyWheel).floatMode();
+    private MotorEx bottomFlyWheel = new MotorEx(Constants.Shooter.bottomFlyWheel).floatMode().reversed();
+    private ServoEx blocker = new ServoEx(Constants.Shooter.blocker);
+
+    private final TelemetryManager panels = PanelsTelemetry.INSTANCE.getTelemetry();
+    private double targetVel = 0.0;
+    private double topTargetVel = 0.0;
+    private double bottomTargetVel = 0.0;
+    private boolean flywheelsEnabled = false;
 
     private ControlSystem flywheelControlSystem = ControlSystem.builder()
             .velPid(topFlyWheelPID)
@@ -90,11 +92,11 @@ public class Shooter implements Subsystem {
     public void periodic() {
         // periodic logic (runs every loop)
         //flywheelControlSystem.setGoal(new KineticState(0.0, targetVel));
-        topFlywheelControlSystem.setGoal(new KineticState(0.0, targetVel));
-        bottomFlywheelControlSystem.setGoal(new KineticState(0.0, targetVel));
+        topFlywheelControlSystem.setGoal(new KineticState(0.0, topTargetVel));
+        bottomFlywheelControlSystem.setGoal(new KineticState(0.0, bottomTargetVel));
         if (flywheelsEnabled) {
             topFlyWheel.setPower(topFlywheelControlSystem.calculate(new KineticState(topFlyWheel.getCurrentPosition(), topFlyWheel.getVelocity())));
-            bottomFlyWheel.setPower(bottomFlywheelControlSystem.calculate(new KineticState(bottomFlyWheel.getCurrentPosition(), bottomFlyWheel.getVelocity())));
+            bottomFlyWheel.setPower(bottomFlywheelControlSystem.calculate(new KineticState(-bottomFlyWheel.getCurrentPosition(), -bottomFlyWheel.getVelocity())));
         }
         else {
             /*//flywheelControlSystem.setGoal(new KineticState(0.0, 0.0));
@@ -105,10 +107,10 @@ public class Shooter implements Subsystem {
         /*double power = flywheelControlSystem.calculate(new KineticState(topFlyWheel.getCurrentPosition(), topFlyWheel.getVelocity()));
         bottomFlyWheel.setPower(power);*/
 
-        ActiveOpMode.telemetry().addData("targetVelo", targetVel);
+        //ActiveOpMode.telemetry().addData("targetVelo", targetVel);
         //ActiveOpMode.telemetry().addData("flywheel goal", flywheelControlSystem.getGoal());
-        ActiveOpMode.telemetry().addData("top flywheel goal", topFlywheelControlSystem.getGoal());
-        ActiveOpMode.telemetry().addData("bottom flywheel goal", bottomFlywheelControlSystem.getGoal());
+        //ActiveOpMode.telemetry().addData("top flywheel goal", topFlywheelControlSystem.getGoal());
+        //ActiveOpMode.telemetry().addData("bottom flywheel goal", bottomFlywheelControlSystem.getGoal());
     }
 
     public double calculateShooterVelocity(double distance) {
@@ -130,6 +132,22 @@ public class Shooter implements Subsystem {
     public void setTargetVelocity(double target) {
         flywheelsEnabled = true;
         this.targetVel = target * shooterTicksPerRevolution / 60; //converting rpm to tick/s
+    }
+
+    public void setTargetVelocity(double topTarget, double bottomTarget) {
+        flywheelsEnabled = true;
+        this.topTargetVel = topTarget * shooterTicksPerRevolution / 60; //converting rpm to tick/s
+        this.bottomTargetVel = bottomTarget * shooterTicksPerRevolution / 60; //converting rpm to tick/s
+    }
+
+    public void setTopTargetVelocity(double target) {
+        flywheelsEnabled = true;
+        this.topTargetVel = target * shooterTicksPerRevolution / 60; //converting rpm to tick/s
+    }
+
+    public void setBottomTargetVelocity(double target) {
+        flywheelsEnabled = true;
+        this.bottomTargetVel = target * shooterTicksPerRevolution / 60; //converting rpm to tick/s
     }
 
     public double getTopFlywheelVelocity() {
@@ -167,13 +185,13 @@ public class Shooter implements Subsystem {
     public void intake() {
         flywheelsEnabled = false;
         topFlyWheel.setPower(-1);
-        bottomFlyWheel.setPower(-1);
+        bottomFlyWheel.setPower(1);
     }
 
     public void outtake() {
         flywheelsEnabled = false;
         topFlyWheel.setPower(1);
-        bottomFlyWheel.setPower(1);
+        bottomFlyWheel.setPower(-1);
     }
 
     public void stop() {
@@ -211,6 +229,17 @@ public class Shooter implements Subsystem {
                 .setIsDone(() -> (
                         topFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, 25.0, Double.POSITIVE_INFINITY)) &&
                         bottomFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, 25.0, Double.POSITIVE_INFINITY))
+                        )
+                );
+    }
+
+    public LambdaCommand setShooterTargetVelocity(double topTarget, double bottomTarget) {
+        return new LambdaCommand()
+                .setStart(() -> setTargetVelocity(topTarget, bottomTarget))
+                .setIsDone(() -> (
+                        true
+                        /*topFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, 25.0, Double.POSITIVE_INFINITY)) &&
+                        bottomFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, 25.0, Double.POSITIVE_INFINITY))*/
                         )
                 );
     }
