@@ -185,13 +185,13 @@ public class Shooter implements Subsystem {
     public void intake() {
         flywheelsEnabled = false;
         topFlyWheel.setPower(-1);
-        bottomFlyWheel.setPower(1);
+        bottomFlyWheel.setPower(-1);
     }
 
     public void outtake() {
         flywheelsEnabled = false;
         topFlyWheel.setPower(1);
-        bottomFlyWheel.setPower(-1);
+        bottomFlyWheel.setPower(1);
     }
 
     public void stop() {
