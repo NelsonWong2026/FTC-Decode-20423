@@ -2,12 +2,8 @@ package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -20,29 +16,22 @@ import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Vision;
 
-import dev.nextftc.core.commands.Command;
-import dev.nextftc.core.commands.groups.ParallelGroup;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
-import dev.nextftc.hardware.driving.DriverControlledCommand;
-import dev.nextftc.hardware.driving.FieldCentric;
 import dev.nextftc.hardware.driving.MecanumDriverControlled;
-import dev.nextftc.hardware.impl.Direction;
-import dev.nextftc.hardware.impl.IMUEx;
-import dev.nextftc.hardware.impl.MotorEx;
 
-@TeleOp(name = "Main Teleop")
-public class MainTeleop extends NextFTCOpMode {
+@TeleOp(name = "Test Teleop")
+public class TestTeleop extends NextFTCOpMode {
     private LLResult llResult;
     private Pose3D botPose = new Pose3D(new Position(DistanceUnit.METER, 0, 0, 0, 0),
             new YawPitchRollAngles(AngleUnit.RADIANS, 0,0, 0, 0));
     private JoinedTelemetry joinedTelemetry = new JoinedTelemetry(PanelsTelemetry.INSTANCE.getFtcTelemetry(), telemetry);
-    //private static final Logger log = LoggerFactory.getLogger(MainTeleop.class);
+//private static final Logger log = LoggerFactory.getLogger(MainTeleop.class);
 
-    public MainTeleop() {
+    public TestTeleop() {
         addComponents(
                 new SubsystemComponent(Drive.INSTANCE, Intake.INSTANCE, Shooter.INSTANCE, Vision.INSTANCE),
                 BindingsComponent.INSTANCE,
@@ -61,43 +50,43 @@ public class MainTeleop extends NextFTCOpMode {
         driveControlled.schedule();
 
         Gamepads.gamepad1().rightBumper()
-                        .whenBecomesTrue(() -> driveControlled.setScalar(0.4))
-                        .whenBecomesFalse(() -> driveControlled.setScalar(1));
+                .whenBecomesTrue(() -> driveControlled.setScalar(0.4))
+                .whenBecomesFalse(() -> driveControlled.setScalar(1));
 
-        Gamepads.gamepad1().a()
-                        .whenBecomesTrue(Drive.INSTANCE::zeroPinpoint);
+        Gamepads.gamepad1().dpadRight()
+                .whenBecomesTrue(Drive.INSTANCE::zeroPinpoint);
 
-        Gamepads.gamepad2().dpadUp()
+        Gamepads.gamepad1().leftBumper()
                 .whenBecomesTrue(Intake.INSTANCE.setIntake())
                 .whenBecomesFalse(Intake.INSTANCE.stopIntake());
-        Gamepads.gamepad2().dpadDown()
-                .whenBecomesTrue(Intake.INSTANCE.setOuttake())
-                .whenBecomesFalse(Intake.INSTANCE.stopIntake());
-        Gamepads.gamepad2().x()
+        Gamepads.gamepad1().x()
                 .whenBecomesTrue(Shooter.INSTANCE.setOuttake())
                 .whenBecomesFalse(Shooter.INSTANCE.stopShooter());
-        Gamepads.gamepad2().y()
+        Gamepads.gamepad1().y()
                 .whenBecomesTrue(Shooter.INSTANCE.setIntake())
                 .whenBecomesFalse(Shooter.INSTANCE.stopShooter());
-        Gamepads.gamepad2().a()
+        Gamepads.gamepad1().a()
                 .whenBecomesTrue(Shooter.INSTANCE.setShooterTargetVelocity(Constants.Shooter.NEAR_SHOOTER_TOP_RPM, Constants.Shooter.NEAR_SHOOTER_BOTTOM_RPM))
                 .whenBecomesFalse(() -> {
                     Shooter.INSTANCE.disableFlyWheelPID();
                     Shooter.INSTANCE.stopShooter();
                 });
-        Gamepads.gamepad2().b()
+        Gamepads.gamepad1().b()
                 .whenBecomesTrue(Shooter.INSTANCE.setShooterTargetVelocity(Constants.Shooter.FAR_SHOOTER_TOP_RPM, Constants.Shooter.FAR_SHOOTER_BOTTOM_RPM))
                 .whenBecomesFalse(() -> {
                     Shooter.INSTANCE.disableFlyWheelPID();
                     Shooter.INSTANCE.stopShooter();
                 });
-
-        Gamepads.gamepad2().leftBumper()
+        Gamepads.gamepad1().leftTrigger().atLeast(0.2)
                 .whenBecomesTrue(Shooter.INSTANCE.unblockBall())
                 .whenBecomesFalse(Shooter.INSTANCE.blockBall());
-        Gamepads.gamepad2().rightBumper()
+        Gamepads.gamepad1().rightTrigger().atLeast(0.2)
                 .whenTrue(Intake.INSTANCE.outtakeWhenFlywheelsReady())
                 .whenBecomesFalse(Intake.INSTANCE.stopIntake());
+
+        Gamepads.gamepad1().back()
+                .whenBecomesTrue(Drive.INSTANCE.enableHeadingPID())
+                .whenBecomesFalse(Drive.INSTANCE.disableHeadingPID());
 
         Vision.INSTANCE.startLimelight();
     }
@@ -115,7 +104,6 @@ public class MainTeleop extends NextFTCOpMode {
             joinedTelemetry.addData("Rot", botPose.getOrientation().getYaw());
         }*/
         //joinedTelemetry.addData("BotPose", botPose);
-        joinedTelemetry.update();
 //        Pose2D botpose = Vision.INSTANCE.getBotPose();
 //        telemetry.addData("Bot Pose", "X: %d, Y: %d, Heading: %d",
 //                botpose.getX(DistanceUnit.METER), botpose.getY(DistanceUnit.METER), botpose.getHeading(AngleUnit.DEGREES));
@@ -132,4 +120,5 @@ public class MainTeleop extends NextFTCOpMode {
     public void onStop() {
         Vision.INSTANCE.stopLimelight();
     }
+
 }

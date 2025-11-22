@@ -66,6 +66,14 @@ public class Vision implements Subsystem {
         }
     }
 
+    public double xCrosshairOffset() {
+        LLResult result = limelight.getLatestResult();
+        if (result != null && result.isValid()) {
+            return result.getTx();
+        }
+        return 0.0;
+    }
+
     public double DistanceFromGoal() {
         LLResult result = limelight.getLatestResult();
         double distance;

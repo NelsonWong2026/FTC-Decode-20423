@@ -92,16 +92,16 @@ public class Shooter implements Subsystem {
     public void periodic() {
         // periodic logic (runs every loop)
         //flywheelControlSystem.setGoal(new KineticState(0.0, targetVel));
-        topFlywheelControlSystem.setGoal(new KineticState(0.0, topTargetVel));
-        bottomFlywheelControlSystem.setGoal(new KineticState(0.0, bottomTargetVel));
         if (flywheelsEnabled) {
+            topFlywheelControlSystem.setGoal(new KineticState(0.0, topTargetVel));
+            bottomFlywheelControlSystem.setGoal(new KineticState(0.0, bottomTargetVel));
             topFlyWheel.setPower(topFlywheelControlSystem.calculate(new KineticState(topFlyWheel.getCurrentPosition(), topFlyWheel.getVelocity())));
             bottomFlyWheel.setPower(bottomFlywheelControlSystem.calculate(new KineticState(-bottomFlyWheel.getCurrentPosition(), -bottomFlyWheel.getVelocity())));
         }
         else {
-            /*//flywheelControlSystem.setGoal(new KineticState(0.0, 0.0));
+            //flywheelControlSystem.setGoal(new KineticState(0.0, 0.0));
             topFlywheelControlSystem.setGoal(new KineticState(0.0, 0.0));
-            bottomFlywheelControlSystem.setGoal(new KineticState(0.0, 0.0));*/
+            bottomFlywheelControlSystem.setGoal(new KineticState(0.0, 0.0));
         }
 
         /*double power = flywheelControlSystem.calculate(new KineticState(topFlyWheel.getCurrentPosition(), topFlyWheel.getVelocity()));
@@ -164,6 +164,11 @@ public class Shooter implements Subsystem {
 
     public double getBottomFlywheelDistance() {
         return bottomFlyWheel.getCurrentPosition() / shooterTicksPerRevolution;
+    }
+
+    public boolean flyWheelsWithinVelocityTolerance() {
+        return topFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, 70.0, Double.POSITIVE_INFINITY)) &&
+                bottomFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, 70.0, Double.POSITIVE_INFINITY));
     }
 
     public void disableFlyWheels() {

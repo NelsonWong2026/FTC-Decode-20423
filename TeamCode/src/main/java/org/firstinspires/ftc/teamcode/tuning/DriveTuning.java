@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.tuning;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -25,14 +26,13 @@ import dev.nextftc.hardware.driving.MecanumDriverControlled;
 import static dev.nextftc.bindings.Bindings.*;
 
 @Config
-@TeleOp(name="ShooterTuning", group = "Tuning")
-public class ShooterTuning extends NextFTCOpMode {
-    public static double blockerPos = Constants.Shooter.CLEAR_POS;
-    public static double shooterVelocity = 0;
-    public static double topShooterVelocity = 0;
-    public static double bottomShooterVelocity = 0;
+@TeleOp(name="DriveTuning", group = "Tuning")
+public class DriveTuning extends NextFTCOpMode {
+    public static boolean headingControl = false;
+    private LLResult llResult;
+    private MecanumDriverControlled driveControlled = Drive.INSTANCE.driveControlled(true);
 
-    public ShooterTuning() {
+    public DriveTuning() {
         addComponents(
                 new SubsystemComponent(Drive.INSTANCE, Intake.INSTANCE, Shooter.INSTANCE, Vision.INSTANCE),
                 BindingsComponent.INSTANCE,
@@ -47,8 +47,7 @@ public class ShooterTuning extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
-        MecanumDriverControlled driveControlled = Drive.INSTANCE.driveControlled(true);
-        driveControlled.schedule();
+        driveControlled.cancel();
 
         Gamepads.gamepad1().rightBumper()
                 .whenBecomesTrue(() -> driveControlled.setScalar(0.4))
@@ -74,30 +73,27 @@ public class ShooterTuning extends NextFTCOpMode {
         Gamepads.gamepad2().leftBumper()
                 .whenBecomesTrue(Shooter.INSTANCE.unblockBall())
                 .whenBecomesFalse(Shooter.INSTANCE.blockBall());
-        Gamepads.gamepad2().rightBumper()
-                .whenTrue(Intake.INSTANCE.outtakeWhenFlywheelsReady())
-                .whenBecomesFalse(Intake.INSTANCE.stopIntake());
-        /*Gamepads.gamepad2().rightBumper()
-                .whenBecomesTrue(new ParallelGroup(
-                        //Shooter.INSTANCE.launchBall()
-                        //Shooter.INSTANCE.unblockBall()
-                ))
-                .whenBecomesFalse(new ParallelGroup(
-                        //Shooter.INSTANCE.resetBallLauncher()
-                        //Shooter.INSTANCE.blockBall()
-                ));*/
+
+        Vision.INSTANCE.startLimelight();
     }
 
     @Override
     public void onUpdate() {
-        //shooter.launcherPosition(launcherPos);
-        //shooter.blockerPosition(blockerPos);
-        Shooter.INSTANCE.setTopTargetVelocity(topShooterVelocity);
-        Shooter.INSTANCE.setBottomTargetVelocity(bottomShooterVelocity);
-        telemetry.addData("Target Velocity", shooterVelocity);
-        telemetry.addData("Top Flywheel Velocity", Shooter.INSTANCE.getTopFlywheelVelocity());
-        telemetry.addData("Bottom Flywheel Velocity", Shooter.INSTANCE.getBottomFlywheelVelocity());
-        telemetry.addData("Pinpoint Position", Drive.INSTANCE.getPinpointPosition());
+        if (headingControl) {
+            driveControlled.cancel();
+            Drive.INSTANCE.enableHeadingPID();
+        }
+        else {
+            driveControlled.schedule();
+            Drive.INSTANCE.disableHeadingPID();
+        }
+        telemetry.addData("Heading Error", Vision.INSTANCE.xCrosshairOffset());
+        telemetry.addData("Heading Goal", 0.0);
         telemetry.update();
+    }
+
+    @Override
+    public void onStop() {
+        Vision.INSTANCE.stopLimelight();
     }
 }

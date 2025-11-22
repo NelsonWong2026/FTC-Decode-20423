@@ -2,12 +2,14 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import androidx.annotation.NonNull;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -17,6 +19,7 @@ import org.firstinspires.ftc.teamcode.Constants;
 
 import java.util.function.Supplier;
 
+import dev.nextftc.control.ControlSystem;
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.Subsystem;
@@ -31,9 +34,20 @@ import dev.nextftc.hardware.impl.Direction;
 import dev.nextftc.hardware.impl.IMUEx;
 import dev.nextftc.hardware.impl.MotorEx;
 
+@Config
 public class Drive implements Subsystem {
     public static final Drive INSTANCE = new Drive();
     private Drive() {};
+
+    double integralSum = 0;
+    public static double Kp = 0.01;
+    public static double Ki = 0;
+    public static double Kd = 0;
+
+    ElapsedTime timer = new ElapsedTime();
+    private double lastError = 0;
+
+    private boolean headingControl = false;
 
     // put hardware, commands, etc here
     private MotorEx leftFront = new MotorEx(Constants.Drive.leftFront).brakeMode().reversed();
@@ -60,6 +74,30 @@ public class Drive implements Subsystem {
     public void periodic() {
         // periodic logic (runs every loop)
         odo.update();
+        if (headingControl) {
+            setDrivePowerForPID(PIDControl(Math.toRadians(0), Math.toRadians(Vision.INSTANCE.xCrosshairOffset())));
+        }
+
+    }
+
+    public double PIDControl(double refrence, double state) {
+        double error = angleWrap(refrence - state);
+        ActiveOpMode.telemetry().addData("Error: ", error);
+        integralSum += error * timer.seconds();
+        double derivative = (error - lastError) / (timer.seconds());
+        lastError = error;
+        timer.reset();
+        double output = (error * Kp) + (derivative * Kd) + (integralSum * Ki);
+        return output;
+    }
+    public double angleWrap(double radians){
+        while(radians > Math.PI){
+            radians -= 2 * Math.PI;
+        }
+        while(radians < -Math.PI){
+            radians += 2 * Math.PI;
+        }
+        return radians;
     }
 
     public Pose2D getPinpointPosition() {
@@ -118,6 +156,20 @@ public class Drive implements Subsystem {
         return odo.getHeading(AngleUnit.RADIANS);
     }
 
+    public Command enableHeadingPID() {
+        return new LambdaCommand()
+                .setStart(() -> {
+                    headingControl = true;
+                });
+    }
+
+    public Command disableHeadingPID() {
+        return new LambdaCommand()
+                .setStart(() -> {
+                    headingControl = false;
+                });
+    }
+
     public Command driveForward() {
         return new LambdaCommand()
                 .setStart(() -> {
@@ -126,6 +178,23 @@ public class Drive implements Subsystem {
                     rightFront.setPower(1);
                     rightBack.setPower(1);
                 });
+    }
+
+    public Command setDrive(double power) {
+        return new LambdaCommand()
+                .setStart(() -> {
+                    leftFront.setPower(power);
+                    leftBack.setPower(power);
+                    rightFront.setPower(power);
+                    rightBack.setPower(power);
+                });
+    }
+
+    public void setDrivePowerForPID(double power) {
+        leftFront.setPower(-power);
+        leftBack.setPower(-power);
+        rightFront.setPower(power);
+        rightBack.setPower(power);
     }
 
     public Command stopDrive() {

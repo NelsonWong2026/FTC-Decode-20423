@@ -53,6 +53,18 @@ public class Intake implements Subsystem {
                 .setStart(() -> stop());
     }
 
+    public LambdaCommand outtakeWhenFlywheelsReady() {
+        return new LambdaCommand()
+                .setUpdate(() -> {
+                    if (Shooter.INSTANCE.flyWheelsWithinVelocityTolerance()) {
+                        intake();
+                    }
+                    else {
+                        stop();
+                    }
+                });
+    }
+
 
 
     @Override
