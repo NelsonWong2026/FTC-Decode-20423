@@ -98,6 +98,7 @@ public class ShooterTuning extends NextFTCOpMode {
         telemetry.addData("Top Flywheel Velocity", Shooter.INSTANCE.getTopFlywheelVelocity());
         telemetry.addData("Bottom Flywheel Velocity", Shooter.INSTANCE.getBottomFlywheelVelocity());
         telemetry.addData("Pinpoint Position", Drive.INSTANCE.getPinpointPosition());
+        telemetry.addData("Distance from Goal", Vision.INSTANCE.DistanceFromGoal());
         telemetry.update();
     }
 }

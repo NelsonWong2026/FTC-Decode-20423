@@ -67,25 +67,43 @@ public class MainTeleop extends NextFTCOpMode {
         Gamepads.gamepad1().a()
                         .whenBecomesTrue(Drive.INSTANCE::zeroPinpoint);
 
+        Gamepads.gamepad1().rightBumper()
+                        .whenBecomesTrue(Drive.INSTANCE.enableHeadingPID())
+                        .whenBecomesFalse(Drive.INSTANCE.disableHeadingPID());
+        Gamepads.gamepad1().leftStickButton()
+                .whenBecomesTrue(Drive.INSTANCE.enableHeadingPID());
+        Gamepads.gamepad1().rightStickButton()
+                .whenBecomesTrue(Drive.INSTANCE.disableHeadingPID())
+                .whenBecomesFalse(Drive.INSTANCE.stopDrive());
+
+        Gamepads.gamepad1().leftStickY().asButton(value -> (value > 0 || value < 0)).or(
+                        Gamepads.gamepad1().leftStickX().asButton(value -> (value > 0 || value < 0)
+                        )).or(
+                        Gamepads.gamepad1().rightStickX().asButton(value -> (value > 0 || value < 0)
+                        ))
+                .whenBecomesTrue(Drive.INSTANCE.disableHeadingPID())
+                .whenBecomesFalse(Drive.INSTANCE.stopDrive());
+
+
         Gamepads.gamepad2().dpadUp()
                 .whenBecomesTrue(Intake.INSTANCE.setIntake())
                 .whenBecomesFalse(Intake.INSTANCE.stopIntake());
         Gamepads.gamepad2().dpadDown()
                 .whenBecomesTrue(Intake.INSTANCE.setOuttake())
                 .whenBecomesFalse(Intake.INSTANCE.stopIntake());
-        Gamepads.gamepad2().x()
+        Gamepads.gamepad2().a()
                 .whenBecomesTrue(Shooter.INSTANCE.setOuttake())
                 .whenBecomesFalse(Shooter.INSTANCE.stopShooter());
-        Gamepads.gamepad2().y()
+        Gamepads.gamepad2().b()
                 .whenBecomesTrue(Shooter.INSTANCE.setIntake())
                 .whenBecomesFalse(Shooter.INSTANCE.stopShooter());
-        Gamepads.gamepad2().a()
+        Gamepads.gamepad2().x()
                 .whenBecomesTrue(Shooter.INSTANCE.setShooterTargetVelocity(Constants.Shooter.NEAR_SHOOTER_TOP_RPM, Constants.Shooter.NEAR_SHOOTER_BOTTOM_RPM))
                 .whenBecomesFalse(() -> {
                     Shooter.INSTANCE.disableFlyWheelPID();
                     Shooter.INSTANCE.stopShooter();
                 });
-        Gamepads.gamepad2().b()
+        Gamepads.gamepad2().y()
                 .whenBecomesTrue(Shooter.INSTANCE.setShooterTargetVelocity(Constants.Shooter.FAR_SHOOTER_TOP_RPM, Constants.Shooter.FAR_SHOOTER_BOTTOM_RPM))
                 .whenBecomesFalse(() -> {
                     Shooter.INSTANCE.disableFlyWheelPID();

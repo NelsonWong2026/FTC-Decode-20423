@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import dev.nextftc.core.units.Distance;
+
 public class Constants {
     public static final class Drive {
         public static final String leftFront = "leftFront";
@@ -18,8 +20,8 @@ public class Constants {
         public static final String rightPivot = "rightPivot";
         public static final String launcher = "launcher";
         public static final String blocker = "blocker";
-        public static final double SHOOTER_HEIGHT = 0;
-        public static final double TARGET_HEIGHT = 0;
+        public static final double SHOOTER_HEIGHT = Distance.fromIn(14).inMeters;
+        public static final double TARGET_HEIGHT = Distance.fromIn(40).inMeters;
         public static final double FLYWHEEL_RADIUS = 2; //inches
         public static final double GRAVITY = 9.80665;
         public static final double SHOOTER_ANGLE = 40;
@@ -36,8 +38,8 @@ public class Constants {
         public static final double AUTO_FAR_SHOOTER_TOP_RPM = 1800;
         public static final double AUTO_FAR_SHOOTER_BOTTOM_RPM = 1800;
 
-        public static final double FAR_SHOOTER_TOP_RPM = 1400;
-        public static final double FAR_SHOOTER_BOTTOM_RPM = 1900;
+        public static final double FAR_SHOOTER_TOP_RPM = 1800;//1400;
+        public static final double FAR_SHOOTER_BOTTOM_RPM = 1800;//1900;
 
         public static final double NEAR_SHOOTER_TOP_RPM = 1500;
         public static final double NEAR_SHOOTER_BOTTOM_RPM = 1500;
@@ -54,8 +56,10 @@ public class Constants {
 
     public static final class Vision {
         public static final String limelight = "limelight";
-        public static final double llHeight = 0;
-        public static final double llAngleAboveGround = 0;
-        public static final double aprilTagHeight = 0;
+        public static final double llForward = Distance.fromIn(6.5).inMeters;
+        public static final double llHeight = Distance.fromIn(14).inMeters;;
+        public static final double llAngleAboveGround = Distance.fromIn(6).inMeters;;
+        public static final double goalHeight = Distance.fromIn(40).inMeters;;
+        public static final double aprilTagHeight = Distance.fromIn(29.5).inMeters;
     }
 }

@@ -1,23 +1,13 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import androidx.annotation.NonNull;
-
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.IMU;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.Constants;
-import org.firstinspires.ftc.teamcode.util.GoBildaPinpointDriver;
 
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
-import dev.nextftc.hardware.impl.Direction;
-import dev.nextftc.hardware.impl.IMUEx;
 
 public class Vision implements Subsystem {
     public static final Vision INSTANCE = new Vision();
@@ -78,7 +68,7 @@ public class Vision implements Subsystem {
         LLResult result = limelight.getLatestResult();
         double distance;
         if (result != null && result.isValid()) {
-            return (Constants.Vision.aprilTagHeight-Constants.Vision.llHeight)/Math.tan(-result.getTy()+Constants.Vision.llAngleAboveGround);
+            return (Constants.Vision.aprilTagHeight -Constants.Vision.llHeight)/Math.tan(-result.getTy()+Constants.Vision.llAngleAboveGround);
         }
         return 0;
     }

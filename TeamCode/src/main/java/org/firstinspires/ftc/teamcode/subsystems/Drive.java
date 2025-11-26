@@ -14,12 +14,18 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.Constants;
+import org.firstinspires.ftc.teamcode.config.PIDFConstants;
 
 import java.util.function.Supplier;
 
 import dev.nextftc.control.ControlSystem;
+import dev.nextftc.control.KineticState;
+import dev.nextftc.control.builder.FeedbackElementBuilder;
+import dev.nextftc.control.feedback.AngleType;
+import dev.nextftc.control.feedback.PIDCoefficients;
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.Subsystem;
@@ -27,6 +33,7 @@ import dev.nextftc.core.units.Angle;
 import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.ftc.GamepadEx;
 import dev.nextftc.ftc.Gamepads;
+import dev.nextftc.functionalInterfaces.Configurator;
 import dev.nextftc.hardware.driving.FieldCentric;
 import dev.nextftc.hardware.driving.HolonomicMode;
 import dev.nextftc.hardware.driving.MecanumDriverControlled;
@@ -36,18 +43,15 @@ import dev.nextftc.hardware.impl.MotorEx;
 
 @Config
 public class Drive implements Subsystem {
+    public static PIDCoefficients headingPID = new PIDCoefficients(
+            PIDFConstants.HEADING_P, PIDFConstants.HEADING_I, PIDFConstants.HEADING_D
+    );
+
     public static final Drive INSTANCE = new Drive();
     private Drive() {};
 
-    double integralSum = 0;
-    public static double Kp = 0.01;
-    public static double Ki = 0;
-    public static double Kd = 0;
-
-    ElapsedTime timer = new ElapsedTime();
-    private double lastError = 0;
-
     private boolean headingControl = false;
+    private double headingGoal = 0.0;
 
     // put hardware, commands, etc here
     private MotorEx leftFront = new MotorEx(Constants.Drive.leftFront).brakeMode().reversed();
@@ -56,9 +60,14 @@ public class Drive implements Subsystem {
     private MotorEx rightBack = new MotorEx(Constants.Drive.rightBack).brakeMode();
     private GoBildaPinpointDriver odo;
     private IMUEx imu = new IMUEx("imu", Direction.UP, Direction.LEFT).zeroed();
-    IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
+    private IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
             RevHubOrientationOnRobot.LogoFacingDirection.UP,
             RevHubOrientationOnRobot.UsbFacingDirection.LEFT));
+
+    private ControlSystem headingControlSystem = ControlSystem.builder()
+            .angular(AngleType.DEGREES,
+                    feedback -> feedback.posPid(headingPID))
+            .build();
 
     @Override
     public void initialize() {
@@ -75,33 +84,25 @@ public class Drive implements Subsystem {
         // periodic logic (runs every loop)
         odo.update();
         if (headingControl) {
-            setDrivePowerForPID(PIDControl(Math.toRadians(0), Math.toRadians(Vision.INSTANCE.xCrosshairOffset())));
+            headingControlSystem.setGoal(new KineticState(headingGoal));
+            setDrivePowerForPID(headingControlSystem.calculate(
+                    new KineticState(Vision.INSTANCE.xCrosshairOffset(),
+                    odo.getHeadingVelocity(UnnormalizedAngleUnit.DEGREES)))
+            );
         }
 
-    }
-
-    public double PIDControl(double refrence, double state) {
-        double error = angleWrap(refrence - state);
-        ActiveOpMode.telemetry().addData("Error: ", error);
-        integralSum += error * timer.seconds();
-        double derivative = (error - lastError) / (timer.seconds());
-        lastError = error;
-        timer.reset();
-        double output = (error * Kp) + (derivative * Kd) + (integralSum * Ki);
-        return output;
-    }
-    public double angleWrap(double radians){
-        while(radians > Math.PI){
-            radians -= 2 * Math.PI;
-        }
-        while(radians < -Math.PI){
-            radians += 2 * Math.PI;
-        }
-        return radians;
     }
 
     public Pose2D getPinpointPosition() {
         return odo.getPosition();
+    }
+
+    public double getHeadingVelocity() {
+        return odo.getHeadingVelocity(UnnormalizedAngleUnit.DEGREES);
+    }
+
+    public void setHeadingGoal(double headingGoal) {
+        this.headingGoal = headingGoal;
     }
 
     public MecanumDriverControlled driveControlled(boolean isFieldCentric) {
@@ -136,6 +137,34 @@ public class Drive implements Subsystem {
 
     }
 
+    public MecanumDriverControlled driveControlledIMU(boolean isFieldCentric) {
+        if (isFieldCentric) {
+            return new MecanumDriverControlled(
+                    leftFront,
+                    rightFront,
+                    leftBack,
+                    rightBack,
+                    Gamepads.gamepad1().leftStickY().negate(),
+                    Gamepads.gamepad1().leftStickX(),
+                    Gamepads.gamepad1().rightStickX(),
+                    new FieldCentric(imu)
+            );
+        }
+        else {
+            return new MecanumDriverControlled(
+                    leftFront,
+                    rightFront,
+                    leftBack,
+                    rightBack,
+                    Gamepads.gamepad1().leftStickY().negate(),
+                    Gamepads.gamepad1().leftStickX(),
+                    Gamepads.gamepad1().rightStickX()
+            );
+        }
+
+    }
+
+
     public GoBildaPinpointDriver getPinpoint() {
         return odo;
     }
@@ -146,6 +175,10 @@ public class Drive implements Subsystem {
 
     public void zeroPinpoint() {
         odo.resetPosAndIMU();
+    }
+
+    public void zeroIMU() {
+        imu.zeroed();
     }
 
     public void updatePinpoint() {

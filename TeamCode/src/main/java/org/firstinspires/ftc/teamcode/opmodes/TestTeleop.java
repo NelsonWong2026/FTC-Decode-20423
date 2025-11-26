@@ -59,19 +59,19 @@ public class TestTeleop extends NextFTCOpMode {
         Gamepads.gamepad1().leftBumper()
                 .whenBecomesTrue(Intake.INSTANCE.setIntake())
                 .whenBecomesFalse(Intake.INSTANCE.stopIntake());
-        Gamepads.gamepad1().x()
+        Gamepads.gamepad1().a()
                 .whenBecomesTrue(Shooter.INSTANCE.setOuttake())
                 .whenBecomesFalse(Shooter.INSTANCE.stopShooter());
-        Gamepads.gamepad1().y()
+        Gamepads.gamepad1().b()
                 .whenBecomesTrue(Shooter.INSTANCE.setIntake())
                 .whenBecomesFalse(Shooter.INSTANCE.stopShooter());
-        Gamepads.gamepad1().a()
+        Gamepads.gamepad1().x()
                 .whenBecomesTrue(Shooter.INSTANCE.setShooterTargetVelocity(Constants.Shooter.NEAR_SHOOTER_TOP_RPM, Constants.Shooter.NEAR_SHOOTER_BOTTOM_RPM))
                 .whenBecomesFalse(() -> {
                     Shooter.INSTANCE.disableFlyWheelPID();
                     Shooter.INSTANCE.stopShooter();
                 });
-        Gamepads.gamepad1().b()
+        Gamepads.gamepad1().y()
                 .whenBecomesTrue(Shooter.INSTANCE.setShooterTargetVelocity(Constants.Shooter.FAR_SHOOTER_TOP_RPM, Constants.Shooter.FAR_SHOOTER_BOTTOM_RPM))
                 .whenBecomesFalse(() -> {
                     Shooter.INSTANCE.disableFlyWheelPID();

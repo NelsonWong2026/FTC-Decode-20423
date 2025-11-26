@@ -1,40 +1,27 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import static org.firstinspires.ftc.teamcode.Constants.Shooter.*;
-import static org.firstinspires.ftc.teamcode.config.ShooterPIDF.BOTTOM_SHOOTER_D;
-import static org.firstinspires.ftc.teamcode.config.ShooterPIDF.BOTTOM_SHOOTER_FF;
-import static org.firstinspires.ftc.teamcode.config.ShooterPIDF.BOTTOM_SHOOTER_I;
-import static org.firstinspires.ftc.teamcode.config.ShooterPIDF.BOTTOM_SHOOTER_P;
-import static org.firstinspires.ftc.teamcode.config.ShooterPIDF.TOP_SHOOTER_D;
-import static org.firstinspires.ftc.teamcode.config.ShooterPIDF.TOP_SHOOTER_FF;
-import static org.firstinspires.ftc.teamcode.config.ShooterPIDF.TOP_SHOOTER_I;
-import static org.firstinspires.ftc.teamcode.config.ShooterPIDF.TOP_SHOOTER_P;
-
-import androidx.annotation.NonNull;
+import static org.firstinspires.ftc.teamcode.config.PIDFConstants.BOTTOM_SHOOTER_D;
+import static org.firstinspires.ftc.teamcode.config.PIDFConstants.BOTTOM_SHOOTER_FF;
+import static org.firstinspires.ftc.teamcode.config.PIDFConstants.BOTTOM_SHOOTER_I;
+import static org.firstinspires.ftc.teamcode.config.PIDFConstants.BOTTOM_SHOOTER_P;
+import static org.firstinspires.ftc.teamcode.config.PIDFConstants.TOP_SHOOTER_D;
+import static org.firstinspires.ftc.teamcode.config.PIDFConstants.TOP_SHOOTER_FF;
+import static org.firstinspires.ftc.teamcode.config.PIDFConstants.TOP_SHOOTER_I;
+import static org.firstinspires.ftc.teamcode.config.PIDFConstants.TOP_SHOOTER_P;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.Constants;
-import org.firstinspires.ftc.teamcode.config.ShooterPIDF;
-
-import java.util.function.DoubleSupplier;
 
 import dev.nextftc.control.ControlSystem;
 import dev.nextftc.control.KineticState;
 import dev.nextftc.control.feedback.PIDCoefficients;
 import dev.nextftc.control.feedforward.BasicFeedforwardParameters;
-import dev.nextftc.control.feedforward.FeedforwardElement;
 import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.Subsystem;
-import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.hardware.impl.ServoEx;
 
@@ -167,8 +154,8 @@ public class Shooter implements Subsystem {
     }
 
     public boolean flyWheelsWithinVelocityTolerance() {
-        return topFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, 70.0, Double.POSITIVE_INFINITY)) &&
-                bottomFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, 70.0, Double.POSITIVE_INFINITY));
+        return topFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, 25.0, Double.POSITIVE_INFINITY)) &&
+                bottomFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, 25.0, Double.POSITIVE_INFINITY));
     }
 
     public void disableFlyWheels() {
