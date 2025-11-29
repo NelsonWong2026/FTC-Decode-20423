@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.Constants;
 
@@ -39,7 +40,7 @@ public class Vision implements Subsystem {
         LLResult result = limelight.getLatestResult();
         limelight.updateRobotOrientation(Drive.INSTANCE.getPinpointHeading());
         if (result != null && result.isValid()) {
-            return result.getBotpose_MT2();
+            return result.getBotpose();
         }
         else {
             return null;
@@ -60,6 +61,24 @@ public class Vision implements Subsystem {
         LLResult result = limelight.getLatestResult();
         if (result != null && result.isValid()) {
             return result.getTx();
+        }
+        return 0.0;
+    }
+
+    public double angleToFaceBlueGoal() {
+        LLResult result = limelight.getLatestResult();
+        if (result != null && result.isValid()) {
+            return 90 - Math.atan((Constants.Shooter.BLUE_GOAL_POSE.getY(DistanceUnit.METER)-result.getBotpose().getPosition().y) /
+                    (Constants.Shooter.BLUE_GOAL_POSE.getX(DistanceUnit.METER)-result.getBotpose().getPosition().x)) * 180/Math.PI;
+        }
+        return 0.0;
+    }
+
+    public double angleToFaceRedGoal() {
+        LLResult result = limelight.getLatestResult();
+        if (result != null && result.isValid()) {
+            return 90 - Math.atan(Math.abs(Constants.Shooter.RED_GOAL_POSE.getY(DistanceUnit.METER)-result.getBotpose().getPosition().y) /
+                    Math.abs(Constants.Shooter.RED_GOAL_POSE.getX(DistanceUnit.METER)-result.getBotpose().getPosition().x)) * 180/Math.PI;
         }
         return 0.0;
     }

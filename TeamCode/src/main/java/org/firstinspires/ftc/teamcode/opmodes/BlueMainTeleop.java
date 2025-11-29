@@ -2,12 +2,9 @@ package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -20,29 +17,23 @@ import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Vision;
 
-import dev.nextftc.core.commands.Command;
-import dev.nextftc.core.commands.groups.ParallelGroup;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
-import dev.nextftc.hardware.driving.DriverControlledCommand;
-import dev.nextftc.hardware.driving.FieldCentric;
 import dev.nextftc.hardware.driving.MecanumDriverControlled;
-import dev.nextftc.hardware.impl.Direction;
-import dev.nextftc.hardware.impl.IMUEx;
-import dev.nextftc.hardware.impl.MotorEx;
 
-@TeleOp(name = "Main Teleop")
-public class MainTeleop extends NextFTCOpMode {
+@TeleOp(name = "Blue Main Teleop")
+@Disabled
+public class BlueMainTeleop extends NextFTCOpMode {
     private LLResult llResult;
     private Pose3D botPose = new Pose3D(new Position(DistanceUnit.METER, 0, 0, 0, 0),
             new YawPitchRollAngles(AngleUnit.RADIANS, 0,0, 0, 0));
     private JoinedTelemetry joinedTelemetry = new JoinedTelemetry(PanelsTelemetry.INSTANCE.getFtcTelemetry(), telemetry);
     //private static final Logger log = LoggerFactory.getLogger(MainTeleop.class);
 
-    public MainTeleop() {
+    public BlueMainTeleop() {
         addComponents(
                 new SubsystemComponent(Drive.INSTANCE, Intake.INSTANCE, Shooter.INSTANCE, Vision.INSTANCE),
                 BindingsComponent.INSTANCE,
@@ -57,19 +48,19 @@ public class MainTeleop extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
-        MecanumDriverControlled driveControlled = Drive.INSTANCE.driveControlled(true);
+        MecanumDriverControlled driveControlled = Drive.INSTANCE.blueDriveControlled(true);
         driveControlled.schedule();
 
         Gamepads.gamepad1().rightBumper()
-                        .whenBecomesTrue(() -> driveControlled.setScalar(0.4))
-                        .whenBecomesFalse(() -> driveControlled.setScalar(1));
+                .whenBecomesTrue(() -> driveControlled.setScalar(0.4))
+                .whenBecomesFalse(() -> driveControlled.setScalar(1));
 
         Gamepads.gamepad1().a()
-                        .whenBecomesTrue(Drive.INSTANCE::zeroPinpoint);
+                .whenBecomesTrue(Drive.INSTANCE::zeroPinpoint);
 
         Gamepads.gamepad1().rightBumper()
-                        .whenBecomesTrue(Drive.INSTANCE.enableHeadingPID())
-                        .whenBecomesFalse(Drive.INSTANCE.disableHeadingPID());
+                .whenBecomesTrue(Drive.INSTANCE.enableHeadingPID())
+                .whenBecomesFalse(Drive.INSTANCE.disableHeadingPID());
         Gamepads.gamepad1().leftStickButton()
                 .whenBecomesTrue(Drive.INSTANCE.enableHeadingPID());
         Gamepads.gamepad1().rightStickButton()
@@ -142,6 +133,9 @@ public class MainTeleop extends NextFTCOpMode {
         joinedTelemetry.addData("Top Flywheel Velocity","%.3f RPM", Shooter.INSTANCE.getTopFlywheelVelocity());
         joinedTelemetry.addData("Bottom Flywheel Velocity","%.3f RPM", Shooter.INSTANCE.getBottomFlywheelVelocity());
         joinedTelemetry.addData("Ready to Shoot: ", Shooter.INSTANCE.flyWheelsWithinVelocityTolerance());
+        joinedTelemetry.addData("Angle To Shoot: ", Vision.INSTANCE.angleToFaceBlueGoal());
+        joinedTelemetry.addData("bot pose", Vision.INSTANCE.getBotPose());
+
         //joinedTelemetry.addData("Pinpoint Position", Drive.INSTANCE.getPinpointPosition());
         joinedTelemetry.update();
     }

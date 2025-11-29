@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Vision;
 
 import dev.nextftc.bindings.Button;
 import dev.nextftc.core.commands.groups.ParallelGroup;
+import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.GamepadEx;
@@ -31,6 +32,18 @@ public class ShooterTuning extends NextFTCOpMode {
     public static double shooterVelocity = 0;
     public static double topShooterVelocity = 0;
     public static double bottomShooterVelocity = 0;
+
+    private LambdaCommand outtakeWhenFlywheelsReady = new LambdaCommand()
+                .setUpdate(() -> {
+        if (Shooter.INSTANCE.flyWheelsWithinVelocityTolerance()) {
+            Intake.INSTANCE.intake();
+            Shooter.INSTANCE.unblockBall();
+        }
+        else {
+            Intake.INSTANCE.stop();
+            Shooter.INSTANCE.blockBall();
+        }
+    });
 
     public ShooterTuning() {
         addComponents(
@@ -75,7 +88,7 @@ public class ShooterTuning extends NextFTCOpMode {
                 .whenBecomesTrue(Shooter.INSTANCE.unblockBall())
                 .whenBecomesFalse(Shooter.INSTANCE.blockBall());
         Gamepads.gamepad2().rightBumper()
-                .whenTrue(Intake.INSTANCE.outtakeWhenFlywheelsReady())
+                .whenTrue(outtakeWhenFlywheelsReady)
                 .whenBecomesFalse(Intake.INSTANCE.stopIntake());
         /*Gamepads.gamepad2().rightBumper()
                 .whenBecomesTrue(new ParallelGroup(

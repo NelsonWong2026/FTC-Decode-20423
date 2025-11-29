@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -14,6 +15,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.Constants;
@@ -84,10 +86,15 @@ public class Drive implements Subsystem {
         // periodic logic (runs every loop)
         odo.update();
         if (headingControl) {
+            /*headingControlSystem.setGoal(new KineticState(Vision.INSTANCE.angleToFaceBlueGoal()));
+            setDrivePowerForPID(headingControlSystem.calculate(
+                    new KineticState(odo.getHeading(AngleUnit.DEGREES),
+                            odo.getHeadingVelocity(UnnormalizedAngleUnit.DEGREES)))
+            );*/
             headingControlSystem.setGoal(new KineticState(headingGoal));
             setDrivePowerForPID(headingControlSystem.calculate(
                     new KineticState(Vision.INSTANCE.xCrosshairOffset(),
-                    odo.getHeadingVelocity(UnnormalizedAngleUnit.DEGREES)))
+                            odo.getHeadingVelocity(UnnormalizedAngleUnit.DEGREES)))
             );
         }
 
@@ -137,6 +144,38 @@ public class Drive implements Subsystem {
 
     }
 
+    public MecanumDriverControlled blueDriveControlled(boolean isFieldCentric) {
+        if (isFieldCentric) {
+            return new MecanumDriverControlled(
+                    leftFront,
+                    rightFront,
+                    leftBack,
+                    rightBack,
+                    Gamepads.gamepad1().leftStickY().negate(),
+                    Gamepads.gamepad1().leftStickX(),
+                    Gamepads.gamepad1().rightStickX(),
+                    new FieldCentric(new Supplier<Angle>() {
+                        @Override
+                        public Angle get() {
+                            return Angle.fromRad(odo.getHeading(AngleUnit.RADIANS)+3*Math.PI/2);
+                        }
+                    })
+            );
+        }
+        else {
+            return new MecanumDriverControlled(
+                    leftFront,
+                    rightFront,
+                    leftBack,
+                    rightBack,
+                    Gamepads.gamepad1().leftStickY().negate(),
+                    Gamepads.gamepad1().leftStickX(),
+                    Gamepads.gamepad1().rightStickX()
+            );
+        }
+
+    }
+
     public MecanumDriverControlled driveControlledIMU(boolean isFieldCentric) {
         if (isFieldCentric) {
             return new MecanumDriverControlled(
@@ -164,6 +203,9 @@ public class Drive implements Subsystem {
 
     }
 
+    public void setHeadingto90() {
+        odo.setHeading(Math.PI/2, AngleUnit.RADIANS);
+    }
 
     public GoBildaPinpointDriver getPinpoint() {
         return odo;
@@ -228,6 +270,16 @@ public class Drive implements Subsystem {
         leftBack.setPower(-power);
         rightFront.setPower(power);
         rightBack.setPower(power);
+    }
+
+    public Command setDriveTurn(double power) {
+        return new LambdaCommand()
+                .setStart(() -> {
+                    leftFront.setPower(-power);
+                    leftBack.setPower(-power);
+                    rightFront.setPower(power);
+                    rightBack.setPower(power);
+                });
     }
 
     public Command stopDrive() {

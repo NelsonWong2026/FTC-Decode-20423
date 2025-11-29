@@ -1,5 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+
 import dev.nextftc.core.units.Distance;
 
 public class Constants {
@@ -35,14 +40,17 @@ public class Constants {
         public static final double BLOCK_POS = 0.11;
         public static final double CLEAR_POS = 0.41;
 
-        public static final double AUTO_FAR_SHOOTER_TOP_RPM = 1800;
-        public static final double AUTO_FAR_SHOOTER_BOTTOM_RPM = 1800;
+        public static final double AUTO_FAR_SHOOTER_TOP_RPM = 1400;
+        public static final double AUTO_FAR_SHOOTER_BOTTOM_RPM = 1600;
 
-        public static final double FAR_SHOOTER_TOP_RPM = 1800;//1400;
-        public static final double FAR_SHOOTER_BOTTOM_RPM = 1800;//1900;
+        public static final double FAR_SHOOTER_TOP_RPM = 1400;//1400;
+        public static final double FAR_SHOOTER_BOTTOM_RPM = 1600;//1900;
 
-        public static final double NEAR_SHOOTER_TOP_RPM = 1500;
-        public static final double NEAR_SHOOTER_BOTTOM_RPM = 1500;
+        public static final double NEAR_SHOOTER_TOP_RPM = 1300;
+        public static final double NEAR_SHOOTER_BOTTOM_RPM = 1400;
+
+        public static final Pose2D RED_GOAL_POSE = new Pose2D(DistanceUnit.METER,-1.4827, 1.4133, AngleUnit.DEGREES, -53.13);
+        public static final Pose2D BLUE_GOAL_POSE = new Pose2D(DistanceUnit.METER,-1.4827, -1.4133, AngleUnit.DEGREES, 53.13);
     }
 
     public static final class Intake {

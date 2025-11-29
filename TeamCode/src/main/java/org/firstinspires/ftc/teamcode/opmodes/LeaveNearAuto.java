@@ -21,10 +21,10 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 
 
 @Config
-@Autonomous(name = "Shoot and Leave Auto", group = "Autonomous")
-public class ShootAndLeaveAuto extends NextFTCOpMode {
+@Autonomous(name = "Leave Near Auto", group = "Autonomous")
+public class LeaveNearAuto extends NextFTCOpMode {
 
-    public ShootAndLeaveAuto() {
+    public LeaveNearAuto() {
         addComponents(
                 new SubsystemComponent(Drive.INSTANCE, Intake.INSTANCE, Shooter.INSTANCE, Vision.INSTANCE),
                 BindingsComponent.INSTANCE,
@@ -35,7 +35,10 @@ public class ShootAndLeaveAuto extends NextFTCOpMode {
     private Command autoRoutine() {
         return new SequentialGroup(
                 Shooter.INSTANCE.blockBall(),
-                Shooter.INSTANCE.setShooterTargetVelocity(Constants.Shooter.AUTO_FAR_SHOOTER_TOP_RPM, Constants.Shooter.AUTO_FAR_SHOOTER_BOTTOM_RPM),
+                Drive.INSTANCE.setDrive(-0.4),
+                new Delay(1.5),
+                Drive.INSTANCE.stopDrive(),
+                Shooter.INSTANCE.setShooterTargetVelocity(Constants.Shooter.NEAR_SHOOTER_TOP_RPM, Constants.Shooter.NEAR_SHOOTER_BOTTOM_RPM),
                 new Delay(4),
                 Shooter.INSTANCE.unblockBall(),
                 new Delay(2),
@@ -53,8 +56,11 @@ public class ShootAndLeaveAuto extends NextFTCOpMode {
                 Shooter.INSTANCE.disableFlyWheelPID(),
                 Shooter.INSTANCE.stopShooter(),
                 Shooter.INSTANCE.blockBall(),
-                Drive.INSTANCE.setDrive(0.4),
-                new Delay(0.5),
+                Drive.INSTANCE.setDriveTurn(-0.2),
+                new Delay(1),
+                Drive.INSTANCE.stopDrive(),
+                Drive.INSTANCE.setDrive(-0.4),
+                new Delay(1),
                 Drive.INSTANCE.stopDrive()
         );
     }
