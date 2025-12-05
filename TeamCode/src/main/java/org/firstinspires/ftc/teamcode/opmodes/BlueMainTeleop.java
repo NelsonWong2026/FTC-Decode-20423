@@ -133,7 +133,7 @@ public class BlueMainTeleop extends NextFTCOpMode {
         joinedTelemetry.addData("Top Flywheel Velocity","%.3f RPM", Shooter.INSTANCE.getTopFlywheelVelocity());
         joinedTelemetry.addData("Bottom Flywheel Velocity","%.3f RPM", Shooter.INSTANCE.getBottomFlywheelVelocity());
         joinedTelemetry.addData("Ready to Shoot: ", Shooter.INSTANCE.flyWheelsWithinVelocityTolerance());
-        joinedTelemetry.addData("Angle To Shoot: ", Vision.INSTANCE.angleToFaceBlueGoal());
+//        joinedTelemetry.addData("Angle To Shoot: ", Vision.INSTANCE.angleToFaceBlueGoal());
         joinedTelemetry.addData("bot pose", Vision.INSTANCE.getBotPose());
 
         //joinedTelemetry.addData("Pinpoint Position", Drive.INSTANCE.getPinpointPosition());

@@ -65,20 +65,17 @@ public class Vision implements Subsystem {
         return 0.0;
     }
 
-    public double angleToFaceBlueGoal() {
+    public double angleToFaceGoal() {
         LLResult result = limelight.getLatestResult();
         if (result != null && result.isValid()) {
-            return 90 - Math.atan((Constants.Shooter.BLUE_GOAL_POSE.getY(DistanceUnit.METER)-result.getBotpose().getPosition().y) /
-                    (Constants.Shooter.BLUE_GOAL_POSE.getX(DistanceUnit.METER)-result.getBotpose().getPosition().x)) * 180/Math.PI;
-        }
-        return 0.0;
-    }
-
-    public double angleToFaceRedGoal() {
-        LLResult result = limelight.getLatestResult();
-        if (result != null && result.isValid()) {
-            return 90 - Math.atan(Math.abs(Constants.Shooter.RED_GOAL_POSE.getY(DistanceUnit.METER)-result.getBotpose().getPosition().y) /
-                    Math.abs(Constants.Shooter.RED_GOAL_POSE.getX(DistanceUnit.METER)-result.getBotpose().getPosition().x)) * 180/Math.PI;
+            if (result.getFiducialResults().get(0).getFiducialId() == 24) {
+                return 90 - Math.atan(Math.abs(Constants.Shooter.RED_GOAL_POSE.getY(DistanceUnit.METER) - result.getBotpose().getPosition().y) /
+                        Math.abs(Constants.Shooter.RED_GOAL_POSE.getX(DistanceUnit.METER) - result.getBotpose().getPosition().x)) * 180 / Math.PI;
+            }
+            else if (result.getFiducialResults().get(0).getFiducialId() == 20) {
+                return 90 - Math.atan((Constants.Shooter.BLUE_GOAL_POSE.getY(DistanceUnit.METER)-result.getBotpose().getPosition().y) /
+                        (Constants.Shooter.BLUE_GOAL_POSE.getX(DistanceUnit.METER)-result.getBotpose().getPosition().x)) * 180/Math.PI;
+            }
         }
         return 0.0;
     }

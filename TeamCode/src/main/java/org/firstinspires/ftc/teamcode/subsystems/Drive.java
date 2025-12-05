@@ -77,8 +77,13 @@ public class Drive implements Subsystem {
         odo = ActiveOpMode.hardwareMap().get(GoBildaPinpointDriver.class, Constants.Drive.pinpoint);
         odo.setOffsets(Constants.Drive.odomXOffset, Constants.Drive.odomYOffset, DistanceUnit.INCH);
         odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD);
-        odo.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
+        odo.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.REVERSED);
         odo.resetPosAndIMU();
+
+        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     @Override
@@ -86,7 +91,7 @@ public class Drive implements Subsystem {
         // periodic logic (runs every loop)
         odo.update();
         if (headingControl) {
-            /*headingControlSystem.setGoal(new KineticState(Vision.INSTANCE.angleToFaceBlueGoal()));
+            /*headingControlSystem.setGoal(new KineticState(Vision.INSTANCE.angleToFaceGoal()));
             setDrivePowerForPID(headingControlSystem.calculate(
                     new KineticState(odo.getHeading(AngleUnit.DEGREES),
                             odo.getHeadingVelocity(UnnormalizedAngleUnit.DEGREES)))

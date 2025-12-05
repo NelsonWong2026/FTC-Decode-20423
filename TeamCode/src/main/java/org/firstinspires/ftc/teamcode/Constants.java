@@ -32,10 +32,6 @@ public class Constants {
         public static final double SHOOTER_ANGLE = 40;
         public static final double shooterTicksPerRevolution = 28;
 
-        //launcher servo positions
-        public static final double LAUNCH_POS = 0.7;
-        public static final double FLAT_POS = 1;
-
         //blocker servo positions
         public static final double BLOCK_POS = 0.11;
         public static final double CLEAR_POS = 0.41;
@@ -51,6 +47,9 @@ public class Constants {
 
         public static final Pose2D RED_GOAL_POSE = new Pose2D(DistanceUnit.METER,-1.4827, 1.4133, AngleUnit.DEGREES, -53.13);
         public static final Pose2D BLUE_GOAL_POSE = new Pose2D(DistanceUnit.METER,-1.4827, -1.4133, AngleUnit.DEGREES, 53.13);
+
+        public static final double redFarGoalAutoAngleOffset = -3.7;
+        public static final double blueFarGoalAutoAngleOffset = 3.7;
     }
 
     public static final class Intake {
