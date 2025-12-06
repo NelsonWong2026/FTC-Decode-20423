@@ -56,6 +56,18 @@ public class TestTeleop extends NextFTCOpMode {
         Gamepads.gamepad1().dpadRight()
                 .whenBecomesTrue(Drive.INSTANCE::zeroPinpoint);
 
+        Gamepads.gamepad1().leftStickButton()
+                .whenBecomesTrue(Drive.INSTANCE.enableHeadingPID());
+        //.whenBecomesFalse(Drive.INSTANCE.disableHeadingPID());
+
+        Gamepads.gamepad1().leftStickY().asButton(value -> (Math.abs(value) > 0.03)).or(
+                        Gamepads.gamepad1().leftStickX().asButton(value -> (Math.abs(value) > 0.03)
+                        )).or(
+                        Gamepads.gamepad1().rightStickX().asButton(value -> (Math.abs(value) > 0.03)
+                        ))
+                .whenBecomesTrue(Drive.INSTANCE.disableHeadingPID())
+                .whenBecomesFalse(Drive.INSTANCE.stopDrive());
+
         Gamepads.gamepad1().leftBumper()
                 .whenBecomesTrue(Intake.INSTANCE.setIntake())
                 .whenBecomesFalse(Intake.INSTANCE.stopIntake());

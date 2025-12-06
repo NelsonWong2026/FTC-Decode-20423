@@ -154,8 +154,8 @@ public class Shooter implements Subsystem {
     }
 
     public boolean flyWheelsWithinVelocityTolerance() {
-        return topFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, 25.0, Double.POSITIVE_INFINITY)) &&
-                bottomFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, 25.0, Double.POSITIVE_INFINITY));
+        return topFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, 20.0, Double.POSITIVE_INFINITY)) &&
+                bottomFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, 20.0, Double.POSITIVE_INFINITY));
     }
 
     public void disableFlyWheels() {

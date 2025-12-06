@@ -39,11 +39,11 @@ public class Constants {
         public static final double AUTO_FAR_SHOOTER_TOP_RPM = 1400;
         public static final double AUTO_FAR_SHOOTER_BOTTOM_RPM = 1600;
 
-        public static final double FAR_SHOOTER_TOP_RPM = 1400;//1400;
-        public static final double FAR_SHOOTER_BOTTOM_RPM = 1600;//1900;
+        public static final double FAR_SHOOTER_TOP_RPM = 1350;//1400;//1400;
+        public static final double FAR_SHOOTER_BOTTOM_RPM = 1700;//1600;//1900;
 
-        public static final double NEAR_SHOOTER_TOP_RPM = 1300;
-        public static final double NEAR_SHOOTER_BOTTOM_RPM = 1400;
+        public static final double NEAR_SHOOTER_TOP_RPM = 1250;//1300;
+        public static final double NEAR_SHOOTER_BOTTOM_RPM = 1450;//1400;
 
         public static final Pose2D RED_GOAL_POSE = new Pose2D(DistanceUnit.METER,-1.4827, 1.4133, AngleUnit.DEGREES, -53.13);
         public static final Pose2D BLUE_GOAL_POSE = new Pose2D(DistanceUnit.METER,-1.4827, -1.4133, AngleUnit.DEGREES, 53.13);

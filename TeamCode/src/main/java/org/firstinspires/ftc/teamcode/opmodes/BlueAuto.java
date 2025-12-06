@@ -32,7 +32,7 @@ public class BlueAuto extends OpMode {
         opmodeTimer.resetTimer();
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(new Pose(72, 8, Math.toRadians(90)));
+        follower.setStartingPose(new Pose(20.101083032490973, 122.85920577617328, Math.toRadians(143.13)));
 
         paths = new Paths(follower); // Build paths
 
@@ -99,7 +99,7 @@ public class BlueAuto extends OpMode {
             firstRow = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(44.188, 84.043), new Pose(14.903, 83.870))
+                            new BezierLine(new Pose(44.188, 84.043), new Pose(16.000, 83.870))
                     )
                     .setTangentHeadingInterpolation()
                     .setReversed()
@@ -108,7 +108,7 @@ public class BlueAuto extends OpMode {
             score2 = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(14.903, 83.870), new Pose(54.412, 88.895))
+                            new BezierLine(new Pose(16.000, 83.870), new Pose(54.412, 88.895))
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(132))
                     .build();
@@ -124,7 +124,7 @@ public class BlueAuto extends OpMode {
             secondRow = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(44.014, 59.957), new Pose(8.318, 59.610))
+                            new BezierLine(new Pose(44.014, 59.957), new Pose(10.000, 59.610))
                     )
                     .setTangentHeadingInterpolation()
                     .setReversed()
@@ -134,7 +134,7 @@ public class BlueAuto extends OpMode {
                     .pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(8.318, 59.610),
+                                    new Pose(10.000, 59.610),
                                     new Pose(33.444, 65.329),
                                     new Pose(14.036, 69.487)
                             )
@@ -161,7 +161,7 @@ public class BlueAuto extends OpMode {
             thirdRow = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(43.148, 35.870), new Pose(8.491, 35.523))
+                            new BezierLine(new Pose(43.148, 35.870), new Pose(9.900, 35.523))
                     )
                     .setTangentHeadingInterpolation()
                     .setReversed()
@@ -170,7 +170,7 @@ public class BlueAuto extends OpMode {
             score4 = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(8.491, 35.523), new Pose(54.412, 88.722))
+                            new BezierLine(new Pose(9.900, 35.523), new Pose(54.412, 88.722))
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(132))
                     .build();
@@ -178,7 +178,7 @@ public class BlueAuto extends OpMode {
             zoneIntake = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(54.412, 88.722), new Pose(11.264, 11.264))
+                            new BezierLine(new Pose(54.412, 88.722), new Pose(14.578, 13.511))
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(132), Math.toRadians(45))
                     .build();
@@ -186,7 +186,7 @@ public class BlueAuto extends OpMode {
             score5 = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(11.264, 11.264), new Pose(54.412, 88.895))
+                            new BezierLine(new Pose(14.578, 13.511), new Pose(54.412, 88.895))
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(132))
                     .build();
@@ -194,7 +194,7 @@ public class BlueAuto extends OpMode {
             park = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(54.412, 88.895), new Pose(14.556, 88.375))
+                            new BezierLine(new Pose(54.412, 88.895), new Pose(16.000, 88.375))
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(132), Math.toRadians(180))
                     .build();
@@ -222,7 +222,7 @@ public class BlueAuto extends OpMode {
                     /* Score Preload */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(paths.firstRow,true);
+                    follower.followPath(paths.firstRow);
                     setPathState(2);
                 }
                 break;
@@ -232,7 +232,7 @@ public class BlueAuto extends OpMode {
                     /* Grab Sample */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(paths.alignFirstRow,true);
+                    follower.followPath(paths.alignFirstRow);
                     setPathState(3);
                 }
                 break;
@@ -241,7 +241,7 @@ public class BlueAuto extends OpMode {
                     /* Score Sample */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(paths.firstRow, true);
+                    follower.followPath(paths.firstRow);
                     setPathState(4);
                 }
             case 4:
@@ -250,7 +250,7 @@ public class BlueAuto extends OpMode {
                     /* Score Sample */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(paths.score2,true);
+                    follower.followPath(paths.score2);
                     setPathState(5);
                 }
                 break;
@@ -260,7 +260,7 @@ public class BlueAuto extends OpMode {
                     /* Grab Sample */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(paths.alignSecondRow,true);
+                    follower.followPath(paths.alignSecondRow);
                     setPathState(6);
                 }
                 break;
@@ -270,7 +270,7 @@ public class BlueAuto extends OpMode {
                     /* Score Sample */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(paths.secondRow,true);
+                    follower.followPath(paths.secondRow);
                     setPathState(7);
                 }
                 break;
@@ -280,7 +280,7 @@ public class BlueAuto extends OpMode {
                     /* Grab Sample */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(paths.lever, true);
+                    follower.followPath(paths.lever);
                     setPathState(8);
                 }
                 break;
@@ -290,7 +290,7 @@ public class BlueAuto extends OpMode {
                     /* Grab Sample */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(paths.score3, true);
+                    follower.followPath(paths.score3);
                     setPathState(9);
                 }
                 break;
@@ -300,7 +300,7 @@ public class BlueAuto extends OpMode {
                     /* Grab Sample */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(paths.alignThirdRow, true);
+                    follower.followPath(paths.alignThirdRow);
                     setPathState(10);
                 }
                 break;
@@ -310,7 +310,7 @@ public class BlueAuto extends OpMode {
                     /* Grab Sample */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(paths.thirdRow, true);
+                    follower.followPath(paths.thirdRow);
                     setPathState(11);
                 }
                 break;
@@ -320,7 +320,7 @@ public class BlueAuto extends OpMode {
                     /* Grab Sample */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(paths.score4, true);
+                    follower.followPath(paths.score4);
                     setPathState(12);
                 }
                 break;
@@ -330,7 +330,7 @@ public class BlueAuto extends OpMode {
                     /* Grab Sample */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(paths.zoneIntake, true);
+                    follower.followPath(paths.zoneIntake);
                     setPathState(13);
                 }
                 break;
@@ -340,7 +340,7 @@ public class BlueAuto extends OpMode {
                     /* Grab Sample */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(paths.score5, true);
+                    follower.followPath(paths.score5);
                     setPathState(14);
                 }
                 break;
@@ -350,7 +350,7 @@ public class BlueAuto extends OpMode {
                     /* Grab Sample */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(paths.park, true);
+                    follower.followPath(paths.park);
                     setPathState(15);
                 }
                 break;
