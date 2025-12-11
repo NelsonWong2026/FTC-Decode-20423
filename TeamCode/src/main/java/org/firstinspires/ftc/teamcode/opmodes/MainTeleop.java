@@ -72,7 +72,7 @@ public class MainTeleop extends NextFTCOpMode {
                         AngleUnit.DEGREES, 0)));
 
         Gamepads.gamepad1().leftTrigger().greaterThan(0.2)
-                        .whenBecomesTrue(Drive.INSTANCE.enableRedLimelightHeadingStopPID());
+                        .whenBecomesTrue(Drive.INSTANCE.enableLimelightHeadingStopPID());
                         //.whenBecomesFalse(Drive.INSTANCE.disableHeadingPID());
         Gamepads.gamepad1().leftBumper()
                         .whenBecomesTrue(Drive.INSTANCE.enableLimelightHeadingPID());
@@ -81,7 +81,7 @@ public class MainTeleop extends NextFTCOpMode {
         Gamepads.gamepad1().rightStickButton()
                 .whenBecomesTrue(Drive.INSTANCE.enableRedHeadingLimelight());
         Gamepads.gamepad1().dpadUp()
-                .whenBecomesTrue(Drive.INSTANCE.enableRedLimelightHeadingStopPID());
+                .whenBecomesTrue(Drive.INSTANCE.enableLimelightHeadingStopPID());
         Gamepads.gamepad1().leftStickY().asButton(value -> (Math.abs(value) > 0.03)).or(
                         Gamepads.gamepad1().leftStickX().asButton(value -> (Math.abs(value) > 0.03)
                         )).or(

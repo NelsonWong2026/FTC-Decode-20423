@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import static org.firstinspires.ftc.teamcode.config.PIDFConstants.TOP_SHOOTER_Ks;
+import static org.firstinspires.ftc.teamcode.config.PIDFConstants.TOP_SHOOTER_Kv;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -21,6 +24,7 @@ import dev.nextftc.control.ControlSystem;
 import dev.nextftc.control.KineticState;
 import dev.nextftc.control.feedback.AngleType;
 import dev.nextftc.control.feedback.PIDCoefficients;
+import dev.nextftc.control.feedforward.BasicFeedforwardParameters;
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.Subsystem;
@@ -36,9 +40,18 @@ import dev.nextftc.hardware.impl.MotorEx;
 
 @Config
 public class Drive implements Subsystem {
+    public static PIDCoefficients xTranslationalPID = new PIDCoefficients(
+            PIDFConstants.XTranslational_P, PIDFConstants.XTranslational_I, PIDFConstants.XTranslational_D
+    );
+    public static PIDCoefficients yTranslationalPID = new PIDCoefficients(
+            PIDFConstants.YTranslational_P, PIDFConstants.YTranslational_I, PIDFConstants.YTranslational_D
+    );
     public static PIDCoefficients headingPID = new PIDCoefficients(
             PIDFConstants.HEADING_P, PIDFConstants.HEADING_I, PIDFConstants.HEADING_D
     );
+
+    public static BasicFeedforwardParameters xTranslationalFeedforward = new BasicFeedforwardParameters(0, 0, PIDFConstants.XTranslational_Ks);
+    public static BasicFeedforwardParameters yTranslationalFeedforward = new BasicFeedforwardParameters(0, 0, PIDFConstants.YTranslational_Ks);
 
     public static final Drive INSTANCE = new Drive();
     private Drive() {};
@@ -61,6 +74,14 @@ public class Drive implements Subsystem {
     private ControlSystem headingControlSystem = ControlSystem.builder()
             .angular(AngleType.DEGREES,
                     feedback -> feedback.posPid(headingPID))
+            .build();
+    private ControlSystem xTranslationalControlSystem = ControlSystem.builder()
+            .posPid(xTranslationalPID)
+            .basicFF(xTranslationalFeedforward)
+            .build();
+    private ControlSystem yTranslationalControlSystem = ControlSystem.builder()
+            .posPid(yTranslationalPID)
+            .basicFF(yTranslationalFeedforward)
             .build();
 
     @Override
@@ -98,10 +119,15 @@ public class Drive implements Subsystem {
         }
         else if (headingControl == 2) {
             headingControlSystem.setGoal(new KineticState(headingGoal));
-            setDrivePowerForPID(headingControlSystem.calculate(
-                    new KineticState(odo.getHeading(AngleUnit.DEGREES),
-                            odo.getHeadingVelocity(UnnormalizedAngleUnit.DEGREES)))
-            );
+            xTranslationalControlSystem.setGoal(new KineticState(getPinpointPosition().getX(DistanceUnit.MM)));
+            yTranslationalControlSystem.setGoal(new KineticState(getPinpointPosition().getY(DistanceUnit.MM)));
+
+            double heading = headingControlSystem.calculate( new KineticState(odo.getHeading(AngleUnit.DEGREES),
+                    odo.getHeadingVelocity(UnnormalizedAngleUnit.DEGREES)));
+            double y = yTranslationalControlSystem.calculate(new KineticState(odo.getPosY(DistanceUnit.MM), odo.getVelY(DistanceUnit.MM)));
+            double x = xTranslationalControlSystem.calculate(new KineticState(odo.getPosX(DistanceUnit.MM), odo.getVelX(DistanceUnit.MM)));
+
+            autoAlignFieldCentric(y, x, heading);
         }
         Pose3D botPose = Vision.INSTANCE.getBotPose();
         /*try {
@@ -121,6 +147,48 @@ public class Drive implements Subsystem {
 
     public void setHeadingGoal(double headingGoal) {
         this.headingGoal = headingGoal;
+    }
+
+    public MecanumDriverControlled autoAlignControlled() {
+        return new MecanumDriverControlled(
+                leftFront,
+                rightFront,
+                leftBack,
+                rightBack,
+                () -> yTranslationalControlSystem.calculate(new KineticState(getPinpointPosition().getY(DistanceUnit.MM))),
+                () -> xTranslationalControlSystem.calculate(new KineticState(getPinpointPosition().getX(DistanceUnit.MM))),
+                () -> headingControlSystem.calculate(new KineticState(getPinpointHeadingDeg())),
+                new FieldCentric(new Supplier<Angle>() {
+                    @Override
+                    public Angle get() {
+                        return Angle.fromRad(odo.getHeading(AngleUnit.RADIANS));
+                    }
+                })
+        );
+    }
+
+    public void autoAlignFieldCentric(double y, double x, double rx) {
+        double botHeading = getPinpointHeadingRad();
+
+        // Rotate the movement direction counter to the bot's rotation
+        double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
+        double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
+
+        rotX = rotX * 1.1;  // Counteract imperfect strafing
+
+        // Denominator is the largest motor power (absolute value) or 1
+        // This ensures all the powers maintain the same ratio,
+        // but only if at least one is out of the range [-1, 1]
+        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
+        double frontLeftPower = (rotY + rotX + rx) / denominator;
+        double backLeftPower = (rotY - rotX + rx) / denominator;
+        double frontRightPower = (rotY - rotX - rx) / denominator;
+        double backRightPower = (rotY + rotX - rx) / denominator;
+
+        leftFront.setPower(frontLeftPower);
+        leftBack.setPower(backLeftPower);
+        rightFront.setPower(frontRightPower);
+        rightBack.setPower(backRightPower);
     }
 
     public MecanumDriverControlled driveControlled(boolean isFieldCentric) {
@@ -300,20 +368,10 @@ public class Drive implements Subsystem {
                 });
     }
 
-    public Command enableRedLimelightHeadingStopPID() {
+    public Command enableLimelightHeadingStopPID() {
         return new LambdaCommand()
                 .setStart(() -> {
                     headingGoal = odo.getHeading(AngleUnit.DEGREES) + Vision.INSTANCE.xCrosshairOffset();
-                    headingControl = 2;
-                    if (Vision.INSTANCE.xCrosshairOffset() != 0.0) {
-                        ActiveOpMode.gamepad1().rumble(200);
-                    }
-                });
-    }
-    public Command enableBlueLimelightHeadingStopPID() {
-        return new LambdaCommand()
-                .setStart(() -> {
-                    headingGoal = odo.getHeading(AngleUnit.DEGREES) - Vision.INSTANCE.xCrosshairOffset();
                     headingControl = 2;
                     if (Vision.INSTANCE.xCrosshairOffset() != 0.0) {
                         ActiveOpMode.gamepad1().rumble(200);

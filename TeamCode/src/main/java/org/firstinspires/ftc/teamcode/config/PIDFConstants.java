@@ -31,4 +31,25 @@ public class PIDFConstants {
     public static double HEADING_P = 0.04; //0.025
     public static double HEADING_I = 0.0000000003; //0.0000000003
     public static double HEADING_D = 0.015; //0.02
+
+    public static double XTranslational_P = 0.0; //0.025
+    public static double XTranslational_I = 0; //0.0000000003
+    public static double XTranslational_D = 0.00;
+    public static double XTranslational_Ks = 0.0;//0.02
+
+    public static double YTranslational_P = 0.0; //0.025
+    public static double YTranslational_I = 0.0; //0.0000000003
+    public static double YTranslational_D = 0.00; //0.02
+    public static double YTranslational_Ks = 0.0;//0.02
+
+    /*public static double XTranslational_P = 0.012; //0.025
+    public static double XTranslational_I = 0; //0.0000000003
+    public static double XTranslational_D = 0.001;
+    public static double XTranslational_Ks = 0.09;//0.02
+
+    public static double YTranslational_P = 0.012; //0.025
+    public static double YTranslational_I = 0.0; //0.0000000003
+    public static double YTranslational_D = 0.001; //0.02
+    public static double YTranslational_Ks = 0.09;//0.02*/
+
 }

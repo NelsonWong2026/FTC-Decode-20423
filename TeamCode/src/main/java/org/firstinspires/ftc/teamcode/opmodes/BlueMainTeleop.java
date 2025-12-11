@@ -51,7 +51,7 @@ public class BlueMainTeleop extends NextFTCOpMode {
     @Override
     public void onStartButtonPressed() {
         endGameTimer.reset();
-        MecanumDriverControlled driveControlled = Drive.INSTANCE.blueDriveControlled();
+        MecanumDriverControlled driveControlled = Drive.INSTANCE.driveControlled(true);
         driveControlled.schedule();
 
         Gamepads.gamepad1().rightBumper()
@@ -75,7 +75,7 @@ public class BlueMainTeleop extends NextFTCOpMode {
                 .whenBecomesTrue(Drive.INSTANCE.enableBlueHeadingPID());
         //.whenBecomesFalse(Drive.INSTANCE.disableHeadingPID());
         Gamepads.gamepad1().leftBumper()
-                .whenBecomesTrue(Drive.INSTANCE.enableBlueLimelightHeadingStopPID());
+                .whenBecomesTrue(Drive.INSTANCE.enableLimelightHeadingStopPID());
         Gamepads.gamepad1().leftTrigger().greaterThan(0.2)
                 .whenBecomesTrue(Drive.INSTANCE.enableLimelightHeadingPID());
         Gamepads.gamepad1().leftStickY().asButton(value -> (Math.abs(value) > 0.03)).or(

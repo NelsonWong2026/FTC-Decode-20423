@@ -75,7 +75,7 @@ public class RedMainTeleop extends NextFTCOpMode {
                 .whenBecomesTrue(Drive.INSTANCE.enableRedHeadingPID());
         //.whenBecomesFalse(Drive.INSTANCE.disableHeadingPID());
         Gamepads.gamepad1().leftBumper()
-                .whenBecomesTrue(Drive.INSTANCE.enableRedLimelightHeadingStopPID());
+                .whenBecomesTrue(Drive.INSTANCE.enableLimelightHeadingStopPID());
         Gamepads.gamepad1().leftTrigger().greaterThan(0.2)
                 .whenBecomesTrue(Drive.INSTANCE.enableLimelightHeadingPID());
         Gamepads.gamepad1().leftStickY().asButton(value -> (Math.abs(value) > 0.03)).or(
