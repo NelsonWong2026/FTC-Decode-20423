@@ -72,7 +72,7 @@ public class MainTeleop extends NextFTCOpMode {
                         AngleUnit.DEGREES, 0)));
 
         Gamepads.gamepad1().leftTrigger().greaterThan(0.2)
-                        .whenBecomesTrue(Drive.INSTANCE.enableLimelightHeadingPID());
+                        .whenBecomesTrue(Drive.INSTANCE.enableRedLimelightHeadingStopPID());
                         //.whenBecomesFalse(Drive.INSTANCE.disableHeadingPID());
         Gamepads.gamepad1().leftBumper()
                         .whenBecomesTrue(Drive.INSTANCE.enableLimelightHeadingPID());
@@ -81,9 +81,7 @@ public class MainTeleop extends NextFTCOpMode {
         Gamepads.gamepad1().rightStickButton()
                 .whenBecomesTrue(Drive.INSTANCE.enableRedHeadingLimelight());
         Gamepads.gamepad1().dpadUp()
-                .whenBecomesTrue(Drive.INSTANCE.enableZeroHeadingPID());
-        Gamepads.gamepad1().dpadDown()
-                .whenBecomesTrue(Drive.INSTANCE.enable180HeadingPID());
+                .whenBecomesTrue(Drive.INSTANCE.enableRedLimelightHeadingStopPID());
         Gamepads.gamepad1().leftStickY().asButton(value -> (Math.abs(value) > 0.03)).or(
                         Gamepads.gamepad1().leftStickX().asButton(value -> (Math.abs(value) > 0.03)
                         )).or(
@@ -92,8 +90,8 @@ public class MainTeleop extends NextFTCOpMode {
                 .whenBecomesTrue(Drive.INSTANCE.disableHeadingPID())
                 .whenBecomesFalse(Drive.INSTANCE.stopDrive());
 
-        Gamepads.gamepad1().leftTrigger().greaterThan(0.2)
-                .whenBecomesTrue(Vision.INSTANCE.relocalizeWithLimelightCommand());
+        /*Gamepads.gamepad1().leftTrigger().greaterThan(0.2)
+                .whenBecomesTrue(Vision.INSTANCE.relocalizeWithLimelightCommand());*/
 
 
         Gamepads.gamepad2().dpadUp()
@@ -134,7 +132,7 @@ public class MainTeleop extends NextFTCOpMode {
     @Override
     public void onUpdate() {
         Vision.INSTANCE.updateOrientationWithPinpoint();
-        if (endGameTimer.seconds() > 90 && !endGameRumbled) {
+        if (endGameTimer.seconds() > 100 && !endGameRumbled) {
             endGameRumbled = true;
             gamepad1.rumble(500);
             gamepad2.rumble(500);

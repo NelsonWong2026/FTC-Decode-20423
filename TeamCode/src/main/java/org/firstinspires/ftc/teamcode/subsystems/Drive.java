@@ -45,6 +45,7 @@ public class Drive implements Subsystem {
 
     private int headingControl = -1;
     private double headingGoal = 0.0;
+    private double headingOffsetLimelight = 0.0;
 
     // put hardware, commands, etc here
     private MotorEx leftFront = new MotorEx(Constants.Drive.leftFront).brakeMode().reversed();
@@ -89,6 +90,13 @@ public class Drive implements Subsystem {
             );
         }
         else if (headingControl == 1) {
+            headingControlSystem.setGoal(new KineticState(headingGoal));
+            setDrivePowerForPID(headingControlSystem.calculate(
+                    new KineticState(odo.getHeading(AngleUnit.DEGREES),
+                            odo.getHeadingVelocity(UnnormalizedAngleUnit.DEGREES)))
+            );
+        }
+        else if (headingControl == 2) {
             headingControlSystem.setGoal(new KineticState(headingGoal));
             setDrivePowerForPID(headingControlSystem.calculate(
                     new KineticState(odo.getHeading(AngleUnit.DEGREES),
@@ -286,6 +294,27 @@ public class Drive implements Subsystem {
                 .setStart(() -> {
                     headingGoal = 0;
                     headingControl = 0;
+                    if (Vision.INSTANCE.xCrosshairOffset() != 0.0) {
+                        ActiveOpMode.gamepad1().rumble(200);
+                    }
+                });
+    }
+
+    public Command enableRedLimelightHeadingStopPID() {
+        return new LambdaCommand()
+                .setStart(() -> {
+                    headingGoal = odo.getHeading(AngleUnit.DEGREES) + Vision.INSTANCE.xCrosshairOffset();
+                    headingControl = 2;
+                    if (Vision.INSTANCE.xCrosshairOffset() != 0.0) {
+                        ActiveOpMode.gamepad1().rumble(200);
+                    }
+                });
+    }
+    public Command enableBlueLimelightHeadingStopPID() {
+        return new LambdaCommand()
+                .setStart(() -> {
+                    headingGoal = odo.getHeading(AngleUnit.DEGREES) - Vision.INSTANCE.xCrosshairOffset();
+                    headingControl = 2;
                     if (Vision.INSTANCE.xCrosshairOffset() != 0.0) {
                         ActiveOpMode.gamepad1().rumble(200);
                     }

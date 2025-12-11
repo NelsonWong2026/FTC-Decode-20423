@@ -72,10 +72,12 @@ public class BlueMainTeleop extends NextFTCOpMode {
                         AngleUnit.DEGREES, 0)));
 
         Gamepads.gamepad1().leftStickButton()
-                .whenBecomesTrue(Drive.INSTANCE.enableLimelightHeadingPID());
+                .whenBecomesTrue(Drive.INSTANCE.enableBlueHeadingPID());
         //.whenBecomesFalse(Drive.INSTANCE.disableHeadingPID());
         Gamepads.gamepad1().leftBumper()
-                .whenBecomesTrue(Drive.INSTANCE.enableBlueHeadingPID());
+                .whenBecomesTrue(Drive.INSTANCE.enableBlueLimelightHeadingStopPID());
+        Gamepads.gamepad1().leftTrigger().greaterThan(0.2)
+                .whenBecomesTrue(Drive.INSTANCE.enableLimelightHeadingPID());
         Gamepads.gamepad1().leftStickY().asButton(value -> (Math.abs(value) > 0.03)).or(
                         Gamepads.gamepad1().leftStickX().asButton(value -> (Math.abs(value) > 0.03)
                         )).or(
@@ -125,7 +127,7 @@ public class BlueMainTeleop extends NextFTCOpMode {
     @Override
     public void onUpdate() {
         Vision.INSTANCE.updateOrientationWithPinpoint();
-        if (endGameTimer.seconds() > 90 && !endGameRumbled) {
+        if (endGameTimer.seconds() > 100 && !endGameRumbled) {
             endGameRumbled = true;
             gamepad1.rumble(500);
             gamepad2.rumble(500);
