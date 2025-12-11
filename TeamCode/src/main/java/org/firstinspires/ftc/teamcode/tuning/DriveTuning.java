@@ -4,7 +4,6 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Constants;
@@ -13,17 +12,12 @@ import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Vision;
 
-import dev.nextftc.bindings.Button;
-import dev.nextftc.core.commands.groups.ParallelGroup;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
-import dev.nextftc.ftc.GamepadEx;
 import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 import dev.nextftc.hardware.driving.MecanumDriverControlled;
-
-import static dev.nextftc.bindings.Bindings.*;
 
 @Config
 @TeleOp(name="DriveTuning", group = "Tuning")
@@ -96,7 +90,7 @@ public class DriveTuning extends NextFTCOpMode {
                 .whenBecomesFalse(Intake.INSTANCE.stopIntake());
 
         Gamepads.gamepad1().leftStickButton()
-                .whenBecomesTrue(Drive.INSTANCE.enableHeadingPID());
+                .whenBecomesTrue(Drive.INSTANCE.enableLimelightHeadingPID());
         Gamepads.gamepad1().rightStickButton()
                 .whenBecomesTrue(Drive.INSTANCE.disableHeadingPID())
                 .whenBecomesFalse(Drive.INSTANCE.stopDrive());

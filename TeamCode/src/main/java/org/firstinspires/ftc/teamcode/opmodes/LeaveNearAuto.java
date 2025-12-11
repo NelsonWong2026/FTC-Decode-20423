@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Drive;
@@ -39,7 +37,7 @@ public class LeaveNearAuto extends NextFTCOpMode {
                 new Delay(1.5),
                 Drive.INSTANCE.stopDrive(),
                 //Drive.INSTANCE.setHeadingGoalCommand(0),
-                Drive.INSTANCE.enableHeadingPID(),
+                Drive.INSTANCE.enableLimelightHeadingPID(),
                 Shooter.INSTANCE.setShooterTargetVelocity(Constants.Shooter.NEAR_SHOOTER_TOP_RPM, Constants.Shooter.NEAR_SHOOTER_BOTTOM_RPM),
                 new Delay(4),
                 Shooter.INSTANCE.unblockBall(),

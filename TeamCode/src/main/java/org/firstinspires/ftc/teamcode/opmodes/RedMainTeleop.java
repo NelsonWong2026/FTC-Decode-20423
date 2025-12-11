@@ -25,17 +25,17 @@ import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 import dev.nextftc.hardware.driving.MecanumDriverControlled;
 
-@TeleOp(name = "Blue Main Teleop")
-public class BlueMainTeleop extends NextFTCOpMode {
+@TeleOp(name = "Red Main Teleop")
+public class RedMainTeleop extends NextFTCOpMode {
     private LLResult llResult;
     private Pose3D botPose = new Pose3D(new Position(DistanceUnit.METER, 0, 0, 0, 0),
             new YawPitchRollAngles(AngleUnit.RADIANS, 0,0, 0, 0));
     private JoinedTelemetry joinedTelemetry = new JoinedTelemetry(PanelsTelemetry.INSTANCE.getFtcTelemetry(), telemetry);
     private ElapsedTime endGameTimer = new ElapsedTime();
     private boolean endGameRumbled = false;
-    //private static final Logger log = LoggerFactory.getLogger(BlueMainTeleop.class);
+    //private static final Logger log = LoggerFactory.getLogger(MainTeleop.class);
 
-    public BlueMainTeleop() {
+    public RedMainTeleop() {
         addComponents(
                 new SubsystemComponent(Drive.INSTANCE, Intake.INSTANCE, Shooter.INSTANCE, Vision.INSTANCE),
                 BindingsComponent.INSTANCE,
@@ -51,7 +51,7 @@ public class BlueMainTeleop extends NextFTCOpMode {
     @Override
     public void onStartButtonPressed() {
         endGameTimer.reset();
-        MecanumDriverControlled driveControlled = Drive.INSTANCE.blueDriveControlled();
+        MecanumDriverControlled driveControlled = Drive.INSTANCE.redDriveControlled();
         driveControlled.schedule();
 
         Gamepads.gamepad1().rightBumper()
@@ -75,7 +75,7 @@ public class BlueMainTeleop extends NextFTCOpMode {
                 .whenBecomesTrue(Drive.INSTANCE.enableLimelightHeadingPID());
         //.whenBecomesFalse(Drive.INSTANCE.disableHeadingPID());
         Gamepads.gamepad1().leftBumper()
-                .whenBecomesTrue(Drive.INSTANCE.enableBlueHeadingPID());
+                .whenBecomesTrue(Drive.INSTANCE.enableRedHeadingPID());
         Gamepads.gamepad1().leftStickY().asButton(value -> (Math.abs(value) > 0.03)).or(
                         Gamepads.gamepad1().leftStickX().asButton(value -> (Math.abs(value) > 0.03)
                         )).or(

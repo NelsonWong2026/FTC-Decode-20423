@@ -3,10 +3,14 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.Constants;
 
+import dev.nextftc.core.commands.Command;
+import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 
@@ -38,7 +42,7 @@ public class Vision implements Subsystem {
 
     public Pose3D getBotPose() {
         LLResult result = limelight.getLatestResult();
-        limelight.updateRobotOrientation(Drive.INSTANCE.getPinpointHeading());
+        limelight.updateRobotOrientation(Drive.INSTANCE.getPinpointHeadingRad());
         if (result != null && result.isValid()) {
             return result.getBotpose();
         }
@@ -65,20 +69,51 @@ public class Vision implements Subsystem {
         return 0.0;
     }
 
-    public double angleToFaceGoal() {
+    public double angleToFaceGoalLimelight() {
         LLResult result = limelight.getLatestResult();
         if (result != null && result.isValid()) {
             if (result.getFiducialResults().get(0).getFiducialId() == 24) {
-                return 90 - Math.atan(Math.abs(Constants.Shooter.RED_GOAL_POSE.getY(DistanceUnit.METER) - result.getBotpose().getPosition().y) /
-                        Math.abs(Constants.Shooter.RED_GOAL_POSE.getX(DistanceUnit.METER) - result.getBotpose().getPosition().x)) * 180 / Math.PI;
+                return 90 - Math.atan(Math.abs(Constants.Shooter.RED_GOAL_POSE.getY() - (result.getBotpose().getPosition().y*Constants.Drive.meterToCoordinateConversion)) /
+                        Math.abs(Constants.Shooter.RED_GOAL_POSE.getX() - result.getBotpose().getPosition().x*Constants.Drive.meterToCoordinateConversion)) * 180 / Math.PI;
             }
             else if (result.getFiducialResults().get(0).getFiducialId() == 20) {
-                return 90 - Math.atan((Constants.Shooter.BLUE_GOAL_POSE.getY(DistanceUnit.METER)-result.getBotpose().getPosition().y) /
-                        (Constants.Shooter.BLUE_GOAL_POSE.getX(DistanceUnit.METER)-result.getBotpose().getPosition().x)) * 180/Math.PI;
+                return 90 - Math.atan((Constants.Shooter.BLUE_GOAL_POSE.getY() - result.getBotpose().getPosition().y*Constants.Drive.meterToCoordinateConversion) /
+                        (Constants.Shooter.BLUE_GOAL_POSE.getX() - result.getBotpose().getPosition().x*Constants.Drive.meterToCoordinateConversion)) * 180/Math.PI;
             }
         }
         return 0.0;
     }
+
+    public boolean aprilTagAreaGreaterThan(double area) {
+        LLResult result = limelight.getLatestResult();
+        if (result != null && result.isValid()) {
+            return result.getBotposeAvgArea() > area;
+        }
+        return false;
+    }
+
+    /*public double angleToFaceGoalOdometry() {
+        return  90 - Math.atan(
+                Math.abs(Constants.Shooter.RED_GOAL_POSE.getY() - (Drive.INSTANCE.getPinpointPosition().getY(DistanceUnit.METER)*Constants.Drive.meterToCoordinateConversion)) /
+                Math.abs(Constants.Shooter.RED_GOAL_POSE.getX() - (Drive.INSTANCE.getPinpointPosition().getX(DistanceUnit.METER)*Constants.Drive.meterToCoordinateConversion))
+        ) * 180 / Math.PI;
+    }*/
+
+    public void relocalizeWithLimelight() {
+        LLResult result = limelight.getLatestResult();
+        if (result != null && result.isValid() && aprilTagAreaGreaterThan(0.4)) {
+            Pose3D botPose = result.getBotpose();
+            Drive.INSTANCE.setPinpointPosition(new Pose2D(DistanceUnit.METER, botPose.getPosition().x, botPose.getPosition().y,
+                    AngleUnit.RADIANS, Drive.INSTANCE.getPinpointHeadingRad()));
+            ActiveOpMode.gamepad1().rumble(200);
+        }
+    }
+
+    public Command relocalizeWithLimelightCommand() {
+        return new LambdaCommand()
+                .setStart(() -> relocalizeWithLimelight());
+    }
+
 
     public double DistanceFromGoal() {
         LLResult result = limelight.getLatestResult();
@@ -94,7 +129,7 @@ public class Vision implements Subsystem {
     }
 
     public void updateOrientationWithPinpoint() {
-        limelight.updateRobotOrientation(Drive.INSTANCE.getPinpointHeading());
+        limelight.updateRobotOrientation(Drive.INSTANCE.getPinpointHeadingRad());
     }
 
 

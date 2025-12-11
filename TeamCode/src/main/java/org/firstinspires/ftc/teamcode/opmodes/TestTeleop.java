@@ -46,7 +46,7 @@ public class TestTeleop extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
-        MecanumDriverControlled driveControlled = Drive.INSTANCE.driveControlled(true);
+        MecanumDriverControlled driveControlled = Drive.INSTANCE.testDriveControlled();
         driveControlled.schedule();
 
         Gamepads.gamepad1().rightBumper()
@@ -57,7 +57,7 @@ public class TestTeleop extends NextFTCOpMode {
                 .whenBecomesTrue(Drive.INSTANCE::zeroPinpoint);
 
         Gamepads.gamepad1().leftStickButton()
-                .whenBecomesTrue(Drive.INSTANCE.enableHeadingPID());
+                .whenBecomesTrue(Drive.INSTANCE.enableLimelightHeadingPID());
         //.whenBecomesFalse(Drive.INSTANCE.disableHeadingPID());
 
         Gamepads.gamepad1().leftStickY().asButton(value -> (Math.abs(value) > 0.03)).or(
@@ -67,6 +67,11 @@ public class TestTeleop extends NextFTCOpMode {
                         ))
                 .whenBecomesTrue(Drive.INSTANCE.disableHeadingPID())
                 .whenBecomesFalse(Drive.INSTANCE.stopDrive());
+
+        Gamepads.gamepad1().leftStickButton()
+                .whenBecomesTrue(Drive.INSTANCE.enableRedHeadingPID());
+        Gamepads.gamepad1().rightStickButton()
+                .whenBecomesTrue(Drive.INSTANCE.enableRedHeadingLimelight());
 
         Gamepads.gamepad1().leftBumper()
                 .whenBecomesTrue(Intake.INSTANCE.setIntake())
@@ -97,7 +102,7 @@ public class TestTeleop extends NextFTCOpMode {
                 .whenBecomesFalse(Intake.INSTANCE.stopIntake());
 
         Gamepads.gamepad1().back()
-                .whenBecomesTrue(Drive.INSTANCE.enableHeadingPID())
+                .whenBecomesTrue(Drive.INSTANCE.enableLimelightHeadingPID())
                 .whenBecomesFalse(Drive.INSTANCE.disableHeadingPID());
 
         Vision.INSTANCE.startLimelight();

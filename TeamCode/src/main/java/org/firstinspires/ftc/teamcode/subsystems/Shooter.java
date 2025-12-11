@@ -2,17 +2,20 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import static org.firstinspires.ftc.teamcode.Constants.Shooter.*;
 import static org.firstinspires.ftc.teamcode.config.PIDFConstants.BOTTOM_SHOOTER_D;
-import static org.firstinspires.ftc.teamcode.config.PIDFConstants.BOTTOM_SHOOTER_FF;
+import static org.firstinspires.ftc.teamcode.config.PIDFConstants.BOTTOM_SHOOTER_Ks;
+import static org.firstinspires.ftc.teamcode.config.PIDFConstants.BOTTOM_SHOOTER_Kv;
 import static org.firstinspires.ftc.teamcode.config.PIDFConstants.BOTTOM_SHOOTER_I;
 import static org.firstinspires.ftc.teamcode.config.PIDFConstants.BOTTOM_SHOOTER_P;
 import static org.firstinspires.ftc.teamcode.config.PIDFConstants.TOP_SHOOTER_D;
-import static org.firstinspires.ftc.teamcode.config.PIDFConstants.TOP_SHOOTER_FF;
+import static org.firstinspires.ftc.teamcode.config.PIDFConstants.TOP_SHOOTER_Ks;
+import static org.firstinspires.ftc.teamcode.config.PIDFConstants.TOP_SHOOTER_Kv;
 import static org.firstinspires.ftc.teamcode.config.PIDFConstants.TOP_SHOOTER_I;
 import static org.firstinspires.ftc.teamcode.config.PIDFConstants.TOP_SHOOTER_P;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Constants;
 
@@ -34,8 +37,8 @@ public class Shooter implements Subsystem {
             BOTTOM_SHOOTER_P, BOTTOM_SHOOTER_I, BOTTOM_SHOOTER_D
     );
 
-    public static BasicFeedforwardParameters topFlyWheelFeedforward = new BasicFeedforwardParameters(TOP_SHOOTER_FF);
-    public static BasicFeedforwardParameters bottomFlyWheelFeedforward = new BasicFeedforwardParameters(BOTTOM_SHOOTER_FF);
+    public static BasicFeedforwardParameters topFlyWheelFeedforward = new BasicFeedforwardParameters(TOP_SHOOTER_Kv, 0, TOP_SHOOTER_Ks);
+    public static BasicFeedforwardParameters bottomFlyWheelFeedforward = new BasicFeedforwardParameters(BOTTOM_SHOOTER_Kv, 0, BOTTOM_SHOOTER_Ks);
 
     public static final Shooter INSTANCE = new Shooter();
     private Shooter() {};
@@ -65,6 +68,23 @@ public class Shooter implements Subsystem {
             .basicFF(bottomFlyWheelFeedforward)
             .build();
 
+    private ElapsedTime stateTimer = new ElapsedTime();
+
+    private enum FlywheelState {
+        IDLE,
+        SPIN_UP,
+        OPEN_GATE,
+        LAUNCH,
+        RESET_GATE
+    }
+
+    private FlywheelState flywheelState;
+
+    private double GATE_OPEN_AND_CLOSE_TIME = 0.3;
+    private double SHOOT_TIME = 0.1;
+    private double WAIT_TIME = 0.2;
+    private int shotsRemaining = 0;
+    private double FLYWHEEL_MAX_SPINUP_TIME = 3;
 
     @Override
     public void initialize() {
@@ -73,6 +93,8 @@ public class Shooter implements Subsystem {
         private DcMotorEx bottomWheel = ActiveOpMode.hardwareMap().get(DcMotorEx.class, Constants.Shooter.bottomFlyWheel);
         topWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         bottomWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);*/
+        flywheelState = FlywheelState.IDLE;
+        setBlocker();
     }
 
     @Override
@@ -98,6 +120,94 @@ public class Shooter implements Subsystem {
         //ActiveOpMode.telemetry().addData("flywheel goal", flywheelControlSystem.getGoal());
         //ActiveOpMode.telemetry().addData("top flywheel goal", topFlywheelControlSystem.getGoal());
         //ActiveOpMode.telemetry().addData("bottom flywheel goal", bottomFlywheelControlSystem.getGoal());
+    }
+
+    public void update() {
+        switch (flywheelState) {
+            case IDLE:
+                if (shotsRemaining > 0) {
+                    setBlocker();
+                    //set velocity
+                    /*flywheelsEnabled = true;
+                    topTargetVel = AUTO_NEAR_SHOOTER_TOP_RPM;
+                    bottomTargetVel = AUTO_NEAR_SHOOTER_BOTTOM_RPM;
+                    topFlywheelControlSystem.setGoal(new KineticState(0.0, AUTO_NEAR_SHOOTER_TOP_RPM));
+                    bottomFlywheelControlSystem.setGoal(new KineticState(0.0, AUTO_NEAR_SHOOTER_BOTTOM_RPM));
+                    topFlyWheel.setPower(topFlywheelControlSystem.calculate(new KineticState(topFlyWheel.getCurrentPosition(), topFlyWheel.getVelocity())));
+                    bottomFlyWheel.setPower(bottomFlywheelControlSystem.calculate(new KineticState(-bottomFlyWheel.getCurrentPosition(), -bottomFlyWheel.getVelocity())));
+*/
+                    stateTimer.reset();
+                    flywheelState = FlywheelState.SPIN_UP;
+                }
+                break;
+            case SPIN_UP:
+                //set velocity
+                /*if (flyWheelsWithinVelocityTolerance(100) || stateTimer.seconds() > FLYWHEEL_MAX_SPINUP_TIME) {
+                    clearBlocker();
+                    stateTimer.reset();
+
+                    flywheelState = FlywheelState.OPEN_GATE;
+                }*/
+                clearBlocker();
+                stateTimer.reset();
+
+                flywheelState = FlywheelState.OPEN_GATE;
+                break;
+            case OPEN_GATE:
+                if (stateTimer.seconds() > GATE_OPEN_AND_CLOSE_TIME) {
+                    Intake.INSTANCE.setIntake();
+                    stateTimer.reset();
+
+                    flywheelState = FlywheelState.LAUNCH;
+                }
+                break;
+            case LAUNCH:
+                if (stateTimer.seconds() > SHOOT_TIME) {
+                    Intake.INSTANCE.stopIntake();
+                    shotsRemaining--;
+                    stateTimer.reset();
+
+                    flywheelState = FlywheelState.RESET_GATE;
+                }
+                break;
+            case RESET_GATE:
+                if (shotsRemaining > 0 && stateTimer.seconds() > WAIT_TIME) {
+                    Intake.INSTANCE.intake();
+                    stateTimer.reset();
+                    flywheelState = FlywheelState.LAUNCH;
+                }
+                else {
+                    //flywheelsEnabled = false;
+                    /*topFlywheelControlSystem.setGoal(new KineticState(0.0, 0.0));
+                    bottomFlywheelControlSystem.setGoal(new KineticState(0.0, 0.0));
+                    topFlyWheel.setPower(0);
+                    bottomFlyWheel.setPower(0);*/
+
+                    setBlocker();
+
+                    flywheelState = FlywheelState.IDLE;
+                }
+                break;
+        }
+    }
+
+    public void shootOnTime(double time) {
+        ElapsedTime actionTimer = new ElapsedTime();
+        actionTimer.reset();
+        Intake.INSTANCE.setIntake();
+        if (actionTimer.seconds() > time) {
+            Intake.INSTANCE.stopIntake();
+        }
+    }
+
+    public void fireShots(int numberOfShots) {
+        if (flywheelState == FlywheelState.IDLE) {
+            shotsRemaining = numberOfShots;
+        }
+    }
+
+    public boolean isBusy() {
+        return flywheelState != FlywheelState.IDLE;
     }
 
     public double calculateShooterVelocity(double distance) {
@@ -154,8 +264,13 @@ public class Shooter implements Subsystem {
     }
 
     public boolean flyWheelsWithinVelocityTolerance() {
-        return topFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, 20.0, Double.POSITIVE_INFINITY)) &&
-                bottomFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, 20.0, Double.POSITIVE_INFINITY));
+        return topFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, veloTolerance, Double.POSITIVE_INFINITY)) &&
+                bottomFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, veloTolerance, Double.POSITIVE_INFINITY));
+    }
+
+    public boolean flyWheelsWithinVelocityTolerance(double tolerance) {
+        return topFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, tolerance, Double.POSITIVE_INFINITY)) &&
+                bottomFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, tolerance, Double.POSITIVE_INFINITY));
     }
 
     public void disableFlyWheels() {
@@ -219,8 +334,8 @@ public class Shooter implements Subsystem {
         return new LambdaCommand()
                 .setStart(() -> setTargetVelocity(target))
                 .setIsDone(() -> (
-                        topFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, 25.0, Double.POSITIVE_INFINITY)) &&
-                        bottomFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, 25.0, Double.POSITIVE_INFINITY))
+                        topFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, veloTolerance, Double.POSITIVE_INFINITY)) &&
+                        bottomFlywheelControlSystem.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, veloTolerance, Double.POSITIVE_INFINITY))
                         )
                 );
     }

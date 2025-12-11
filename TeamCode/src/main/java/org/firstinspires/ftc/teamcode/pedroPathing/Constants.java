@@ -17,8 +17,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(11.8)
-            .forwardZeroPowerAcceleration(-29.197)
-            .lateralZeroPowerAcceleration(-69.024)
+            .forwardZeroPowerAcceleration(-41.93)
+            .lateralZeroPowerAcceleration(-66.79)
             .useSecondaryDrivePIDF(true)
             .useSecondaryHeadingPIDF(true)
             .useSecondaryDrivePIDF(true)
@@ -36,7 +36,7 @@ public class Constants {
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .pinpointLocalizer(localizerConstants)
-                .pathConstraints(pathConstraints)
+                //.pathConstraints(pathConstraints)
                 .mecanumDrivetrain(driveConstants)
                 .build();
     }
@@ -51,12 +51,12 @@ public class Constants {
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .xVelocity(76.29)
-            .yVelocity(62.552);
+            .xVelocity(78.02)
+            .yVelocity(62.9);
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .forwardPodY(-4.8)
-            .strafePodX(-7.25)
+            .forwardPodY(org.firstinspires.ftc.teamcode.Constants.Drive.odomYOffset)
+            .strafePodX(org.firstinspires.ftc.teamcode.Constants.Drive.odomXOffset)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("pinpoint")
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD)
