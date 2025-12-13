@@ -28,6 +28,10 @@ public class PIDFConstants {
     public static double BOTTOM_SHOOTER_Kv = 0.0004;//0.0005;
     public static double BOTTOM_SHOOTER_Ks = 0.09;*/
 
+    public static double INTAKE_P = 0.01;
+    public static double INTAKE_I = 0;
+    public static double INTAKE_D = 0.00025;
+
     public static double HEADING_P = 0.04; //0.025
     public static double HEADING_I = 0.0000000003; //0.0000000003
     public static double HEADING_D = 0.015; //0.02

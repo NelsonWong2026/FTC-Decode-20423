@@ -1,8 +1,5 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import static org.firstinspires.ftc.teamcode.config.PIDFConstants.TOP_SHOOTER_Ks;
-import static org.firstinspires.ftc.teamcode.config.PIDFConstants.TOP_SHOOTER_Kv;
-
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -59,6 +56,7 @@ public class Drive implements Subsystem {
     private int headingControl = -1;
     private double headingGoal = 0.0;
     private double headingOffsetLimelight = 0.0;
+    private boolean operatorRumbled = false;
 
     // put hardware, commands, etc here
     private MotorEx leftFront = new MotorEx(Constants.Drive.leftFront).brakeMode().reversed();
@@ -128,6 +126,14 @@ public class Drive implements Subsystem {
             double x = xTranslationalControlSystem.calculate(new KineticState(odo.getPosX(DistanceUnit.MM), odo.getVelX(DistanceUnit.MM)));
 
             autoAlignFieldCentric(y, x, heading);
+        }
+        else if (headingControl == 3) {
+            headingControlSystem.setGoal(new KineticState(headingGoal));
+
+            double heading = headingControlSystem.calculate( new KineticState(odo.getHeading(AngleUnit.DEGREES),
+                    odo.getHeadingVelocity(UnnormalizedAngleUnit.DEGREES)));
+
+            setDrivePowerForPID(heading);
         }
         Pose3D botPose = Vision.INSTANCE.getBotPose();
         /*try {
@@ -357,6 +363,10 @@ public class Drive implements Subsystem {
         return odo.getHeading(AngleUnit.DEGREES);
     }
 
+    public double getHeadingGoal() {
+        return headingGoal;
+    }
+
     public Command enableLimelightHeadingPID() {
         return new LambdaCommand()
                 .setStart(() -> {
@@ -371,12 +381,36 @@ public class Drive implements Subsystem {
     public Command enableLimelightHeadingStopPID() {
         return new LambdaCommand()
                 .setStart(() -> {
-                    headingGoal = odo.getHeading(AngleUnit.DEGREES) + Vision.INSTANCE.xCrosshairOffset();
+                    operatorRumbled = false;
+                    headingGoal = odo.getHeading(AngleUnit.DEGREES) - Vision.INSTANCE.xCrosshairOffset();
                     headingControl = 2;
                     if (Vision.INSTANCE.xCrosshairOffset() != 0.0) {
                         ActiveOpMode.gamepad1().rumble(200);
                     }
+                })
+                .setIsDone(() -> true);
+    }
+
+    public Command rumbleIfWithinTolerance() {
+        return new LambdaCommand()
+                .setUpdate(() -> {
+                    if ((Math.abs(headingGoal - odo.getHeading(AngleUnit.DEGREES)) < 0.3) && operatorRumbled == false) {
+                        operatorRumbled = true;
+                        ActiveOpMode.gamepad2().rumble(200);
+                    }
                 });
+    }
+
+    public Command enableLimelightHeadingStopPID2() {
+        return new LambdaCommand()
+                .setStart(() -> {
+                    headingGoal = odo.getHeading(AngleUnit.DEGREES) - Vision.INSTANCE.xCrosshairOffset();
+                    headingControl = 3;
+                    if (Vision.INSTANCE.xCrosshairOffset() != 0.0) {
+                        ActiveOpMode.gamepad1().rumble(200);
+                    }
+                })
+                .setIsDone(() -> true);
     }
 
     public Command enableRedHeadingPID() {

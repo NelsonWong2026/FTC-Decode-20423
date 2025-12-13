@@ -63,7 +63,9 @@ public class Vision implements Subsystem {
 
     public double xCrosshairOffset() {
         LLResult result = limelight.getLatestResult();
-        if (result != null && result.isValid()) {
+        if (result != null && result.isValid() &&
+                (result.getFiducialResults().get(0).getFiducialId() == 20 ||
+                        result.getFiducialResults().get(0).getFiducialId() == 24)) {
             return result.getTx();
         }
         return 0.0;

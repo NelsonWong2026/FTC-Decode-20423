@@ -48,8 +48,8 @@ public class Constants {
         public static final double AUTO_FAR_SHOOTER_TOP_RPM = 1350;
         public static final double AUTO_FAR_SHOOTER_BOTTOM_RPM = 1700;
 
-        public static final double AUTO_NEAR_SHOOTER_TOP_RPM = 1250;
-        public static final double AUTO_NEAR_SHOOTER_BOTTOM_RPM = 1450;
+        public static final double AUTO_NEAR_SHOOTER_TOP_RPM = 1200;//1320;//1200;
+        public static final double AUTO_NEAR_SHOOTER_BOTTOM_RPM = 1480;//1320;//1480;
 
         public static final double FAR_SHOOTER_TOP_RPM = 1350;//1400;//1400;
         public static final double FAR_SHOOTER_BOTTOM_RPM = 1700;//1600;//1900;
@@ -82,6 +82,8 @@ public class Constants {
     public static final class Intake {
         public static final String intake = "intake";
         public static final double intakeSpeed = 0.8;
+
+        public static final double ticksToShoot3Balls = 600;
 
         public static final double INTAKE_P = 0.0;
         public static final double INTAKE_I = 0.0;

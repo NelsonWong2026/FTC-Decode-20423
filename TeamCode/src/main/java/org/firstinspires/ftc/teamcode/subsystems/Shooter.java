@@ -51,6 +51,8 @@ public class Shooter implements Subsystem {
     private double targetVel = 0.0;
     private double topTargetVel = 0.0;
     private double bottomTargetVel = 0.0;
+    private double intakeGoal = 180.0;
+    private double intakePosition = 0.0;
     private boolean flywheelsEnabled = false;
 
     private ControlSystem flywheelControlSystem = ControlSystem.builder()
@@ -69,6 +71,7 @@ public class Shooter implements Subsystem {
             .build();
 
     private ElapsedTime stateTimer = new ElapsedTime();
+    private ElapsedTime shooterTimer = new ElapsedTime();
 
     private enum FlywheelState {
         IDLE,
@@ -80,11 +83,11 @@ public class Shooter implements Subsystem {
 
     private FlywheelState flywheelState;
 
-    private double GATE_OPEN_AND_CLOSE_TIME = 0.3;
-    private double SHOOT_TIME = 0.1;
-    private double WAIT_TIME = 0.2;
+    private double GATE_OPEN_AND_CLOSE_TIME = 1.5;
+    private double SHOOT_TIME = 0.15;
+    private double WAIT_TIME = 0.7;
     private int shotsRemaining = 0;
-    private double FLYWHEEL_MAX_SPINUP_TIME = 3;
+    private double FLYWHEEL_MAX_SPINUP_TIME = 4;
 
     @Override
     public void initialize() {
@@ -126,44 +129,24 @@ public class Shooter implements Subsystem {
         switch (flywheelState) {
             case IDLE:
                 if (shotsRemaining > 0) {
-                    setBlocker();
-                    //set velocity
-                    /*flywheelsEnabled = true;
-                    topTargetVel = AUTO_NEAR_SHOOTER_TOP_RPM;
-                    bottomTargetVel = AUTO_NEAR_SHOOTER_BOTTOM_RPM;
-                    topFlywheelControlSystem.setGoal(new KineticState(0.0, AUTO_NEAR_SHOOTER_TOP_RPM));
-                    bottomFlywheelControlSystem.setGoal(new KineticState(0.0, AUTO_NEAR_SHOOTER_BOTTOM_RPM));
-                    topFlyWheel.setPower(topFlywheelControlSystem.calculate(new KineticState(topFlyWheel.getCurrentPosition(), topFlyWheel.getVelocity())));
-                    bottomFlyWheel.setPower(bottomFlywheelControlSystem.calculate(new KineticState(-bottomFlyWheel.getCurrentPosition(), -bottomFlyWheel.getVelocity())));
-*/
-                    stateTimer.reset();
-                    flywheelState = FlywheelState.SPIN_UP;
-                }
-                break;
-            case SPIN_UP:
-                //set velocity
-                /*if (flyWheelsWithinVelocityTolerance(100) || stateTimer.seconds() > FLYWHEEL_MAX_SPINUP_TIME) {
+                    intakePosition = Intake.INSTANCE.getCurrentPosition();
                     clearBlocker();
                     stateTimer.reset();
-
                     flywheelState = FlywheelState.OPEN_GATE;
-                }*/
-                clearBlocker();
-                stateTimer.reset();
-
-                flywheelState = FlywheelState.OPEN_GATE;
+                }
                 break;
             case OPEN_GATE:
                 if (stateTimer.seconds() > GATE_OPEN_AND_CLOSE_TIME) {
-                    Intake.INSTANCE.setIntake();
                     stateTimer.reset();
-
+                    Intake.INSTANCE.setTargetPosition(intakePosition + intakeGoal);
                     flywheelState = FlywheelState.LAUNCH;
                 }
                 break;
             case LAUNCH:
                 if (stateTimer.seconds() > SHOOT_TIME) {
-                    Intake.INSTANCE.stopIntake();
+                    Intake.INSTANCE.stop();
+                    Intake.INSTANCE.disableIntakePID();
+                    intakeGoal += 180;
                     shotsRemaining--;
                     stateTimer.reset();
 
@@ -171,24 +154,27 @@ public class Shooter implements Subsystem {
                 }
                 break;
             case RESET_GATE:
-                if (shotsRemaining > 0 && stateTimer.seconds() > WAIT_TIME) {
-                    Intake.INSTANCE.intake();
+                if (shotsRemaining > 0 && (stateTimer.seconds() > WAIT_TIME /*|| flyWheelsWithinVelocityTolerance(15)*/)) {
                     stateTimer.reset();
+                    Intake.INSTANCE.setTargetPosition(intakePosition + intakeGoal);
                     flywheelState = FlywheelState.LAUNCH;
                 }
-                else {
-                    //flywheelsEnabled = false;
-                    /*topFlywheelControlSystem.setGoal(new KineticState(0.0, 0.0));
-                    bottomFlywheelControlSystem.setGoal(new KineticState(0.0, 0.0));
-                    topFlyWheel.setPower(0);
-                    bottomFlyWheel.setPower(0);*/
-
+                else if (shotsRemaining == 0 && stateTimer.seconds() > 0.3){
+                    intakeGoal = 180;
+                    Intake.INSTANCE.disableIntakePID();
                     setBlocker();
-
                     flywheelState = FlywheelState.IDLE;
                 }
                 break;
         }
+    }
+
+    public FlywheelState getFlyWheelState() {
+        return flywheelState;
+    }
+
+    public double getShotsRemaining() {
+        return shotsRemaining;
     }
 
     public void shootOnTime(double time) {
@@ -276,6 +262,8 @@ public class Shooter implements Subsystem {
     public void disableFlyWheels() {
         flywheelsEnabled = false;
     }
+
+    public void enableFlyWheels() {flywheelsEnabled = true;}
 
     public void setBlocker() {
         blocker.setPosition(BLOCK_POS);

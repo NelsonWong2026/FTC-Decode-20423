@@ -71,17 +71,18 @@ public class MainTeleop extends NextFTCOpMode {
                         67.0*Constants.Drive.coordinateToMeterConversion, 67.75*Constants.Drive.coordinateToMeterConversion,
                         AngleUnit.DEGREES, 0)));
 
-        Gamepads.gamepad1().leftTrigger().greaterThan(0.2)
+        /*Gamepads.gamepad1().leftTrigger().greaterThan(0.2)
                         .whenBecomesTrue(Drive.INSTANCE.enableLimelightHeadingStopPID());
-                        //.whenBecomesFalse(Drive.INSTANCE.disableHeadingPID());
+                        //.whenBecomesFalse(Drive.INSTANCE.disableHeadingPID());*/
         Gamepads.gamepad1().leftBumper()
-                        .whenBecomesTrue(Drive.INSTANCE.enableLimelightHeadingPID());
-        Gamepads.gamepad1().leftStickButton()
+                        .whenBecomesTrue(Drive.INSTANCE.enableLimelightHeadingStopPID2())
+                        .whenBecomesFalse(Drive.INSTANCE.rumbleIfWithinTolerance());
+        /*Gamepads.gamepad1().leftStickButton()
                         .whenBecomesTrue(Drive.INSTANCE.enableRedHeadingPID());
         Gamepads.gamepad1().rightStickButton()
                 .whenBecomesTrue(Drive.INSTANCE.enableRedHeadingLimelight());
         Gamepads.gamepad1().dpadUp()
-                .whenBecomesTrue(Drive.INSTANCE.enableLimelightHeadingStopPID());
+                .whenBecomesTrue(Drive.INSTANCE.enableLimelightHeadingStopPID2());*/
         Gamepads.gamepad1().leftStickY().asButton(value -> (Math.abs(value) > 0.03)).or(
                         Gamepads.gamepad1().leftStickX().asButton(value -> (Math.abs(value) > 0.03)
                         )).or(
@@ -118,7 +119,6 @@ public class MainTeleop extends NextFTCOpMode {
                     Shooter.INSTANCE.disableFlyWheelPID();
                     Shooter.INSTANCE.stopShooter();
                 });*/
-
         Gamepads.gamepad2().leftBumper()
                 .whenBecomesTrue(Shooter.INSTANCE.unblockBall())
                 .whenBecomesFalse(Shooter.INSTANCE.blockBall());
@@ -154,12 +154,13 @@ public class MainTeleop extends NextFTCOpMode {
 //                botpose.getX(DistanceUnit.METER), botpose.getY(DistanceUnit.METER), botpose.getHeading(AngleUnit.DEGREES));
         //joinedTelemetry.addData("Top Flywheel Distance", "%.3f rot", Shooter.INSTANCE.getTopFlywheelDistance());
         //joinedTelemetry.addData("Bottom Flywheel Distance","%.3f rot", Shooter.INSTANCE.getBottomFlywheelDistance());
+        joinedTelemetry.addData("Intake Pos", Intake.INSTANCE.getCurrentPosition());
         joinedTelemetry.addData("Top Flywheel Velocity","%.3f RPM", Shooter.INSTANCE.getTopFlywheelVelocity());
         joinedTelemetry.addData("Bottom Flywheel Velocity","%.3f RPM", Shooter.INSTANCE.getBottomFlywheelVelocity());
         joinedTelemetry.addData("Ready to Shoot: ", Shooter.INSTANCE.flyWheelsWithinVelocityTolerance());
         joinedTelemetry.addData("Bot Heading", Drive.INSTANCE.getPinpointHeadingDeg());
         joinedTelemetry.addData("Bot Pos", Drive.INSTANCE.getPinpointPosition());
-        joinedTelemetry.addData("Angle TO Shoot Odom: ", Drive.INSTANCE.angleToFaceRedGoalOdometry());
+        joinedTelemetry.addData("Heading Goal", Drive.INSTANCE.getHeadingGoal());
         joinedTelemetry.addData("Area > 0.1", Vision.INSTANCE.aprilTagAreaGreaterThan(0.1));
         try {
             joinedTelemetry.addData("Angle To Shoot: ", Vision.INSTANCE.angleToFaceGoalLimelight());
